@@ -20,6 +20,8 @@ public record AlunoCadastroDTO(
         String senha,
 
         @Size(max = 255, message = "A URL da foto deve ter no maximo 255 caracteres")
-        String foto
+        String foto,
+
+        Long turmaId
 ) {
 }

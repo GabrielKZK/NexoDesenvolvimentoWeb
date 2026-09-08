@@ -2,6 +2,11 @@ package com.nexo.projeto.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Entity
@@ -30,4 +35,15 @@ public class Aluno {
     private int tarefasFeitasHoje;
 
     private int tarefasHoje;
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @ManyToOne
+    @JoinColumn(name = "turma_id")
+    private Turma turma;
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @ManyToMany(mappedBy = "alunos")
+    private List<Materia> materias = new ArrayList<>();
 }

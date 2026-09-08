@@ -1,5 +1,7 @@
 package com.nexo.projeto.dto;
 
+import java.util.List;
+
 public record AlunoDTO(
         Long id,
         String nome,
@@ -10,6 +12,9 @@ public record AlunoDTO(
         int metaSemanalXp,
         int ofensivaDias,
         int tarefasFeitasHoje,
-        int tarefasHoje
+        int tarefasHoje,
+        Long turmaId,
+        String turmaNome,
+        List<Long> materiaIds
 ) {
 }

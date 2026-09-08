@@ -64,4 +64,14 @@ public class TurmaController {
 
         return ResponseEntity.ok(mod);
     }
+
+    @PostMapping("/{turmaId}/materias/{materiaId}")
+    public ResponseEntity<TurmaDto> vincularMateria(@PathVariable Long turmaId, @PathVariable Long materiaId){
+        return ResponseEntity.ok(service.vincularMateria(turmaId, materiaId));
+    }
+
+    @DeleteMapping("/{turmaId}/materias/{materiaId}")
+    public ResponseEntity<TurmaDto> desvincularMateria(@PathVariable Long turmaId, @PathVariable Long materiaId){
+        return ResponseEntity.ok(service.desvincularMateria(turmaId, materiaId));
+    }
 }

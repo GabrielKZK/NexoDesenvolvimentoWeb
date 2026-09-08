@@ -1,7 +1,9 @@
 package com.nexo.projeto.dto.mapper;
 
 import com.nexo.projeto.dto.MateriaDto;
+import com.nexo.projeto.entity.Aluno;
 import com.nexo.projeto.entity.Materia;
+import com.nexo.projeto.entity.Turma;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -11,7 +13,9 @@ public class MaterialMapper {
         return new MateriaDto(
                 m.getId(),
                 m.getNome(),
-                m.getSegmento())
+                m.getSegmento(),
+                m.getTurmas().stream().map(Turma::getId).toList(),
+                m.getAlunos().stream().map(Aluno::getId).toList())
                 ;
     }
 

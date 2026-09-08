@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,7 +19,9 @@ public class Materia {
     private String nome;
     private String segmento;
 
-   /* @ManyToMany
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @ManyToMany
     @JoinTable(
             name = "materia_aluno",
             joinColumns = @JoinColumn(name = "materia_id"),
@@ -26,12 +29,13 @@ public class Materia {
     )
     private List<Aluno> alunos = new ArrayList<>();
 
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @ManyToMany
     @JoinTable(
             name = "materia_turma",
             joinColumns = @JoinColumn(name = "materia_id"),
             inverseJoinColumns = @JoinColumn(name = "turma_id")
     )
-    private List<Turma> turma = new ArrayList<>();*/
-    /*As entidades associativas estarão como comentario até turma e aluno estarem prontos*/
+    private List<Turma> turmas = new ArrayList<>();
 }

@@ -3,6 +3,7 @@ package com.nexo.projeto.dto.mapper;
 import com.nexo.projeto.dto.AlunoCadastroDTO;
 import com.nexo.projeto.dto.AlunoDTO;
 import com.nexo.projeto.entity.Aluno;
+import com.nexo.projeto.entity.Materia;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -12,6 +13,14 @@ public class AlunoMapper {
         if (aluno == null) {
             return null;
         }
+
+        Long turmaId = null;
+        String turmaNome = null;
+        if (aluno.getTurma() != null) {
+            turmaId = aluno.getTurma().getId();
+            turmaNome = aluno.getTurma().getNome();
+        }
+
         return new AlunoDTO(
                 aluno.getId(),
                 aluno.getNome(),
@@ -22,7 +31,10 @@ public class AlunoMapper {
                 aluno.getMetaSemanalXp(),
                 aluno.getOfensivaDias(),
                 aluno.getTarefasFeitasHoje(),
-                aluno.getTarefasHoje()
+                aluno.getTarefasHoje(),
+                turmaId,
+                turmaNome,
+                aluno.getMaterias().stream().map(Materia::getId).toList()
         );
     }
 

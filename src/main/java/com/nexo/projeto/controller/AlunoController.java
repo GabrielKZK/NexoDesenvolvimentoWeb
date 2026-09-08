@@ -56,6 +56,16 @@ public class AlunoController {
         return service.deletar(id);
     }
 
+    @PostMapping("/{id}/materias/{materiaId}")
+    public ResponseEntity<AlunoDTO> matricularEmMateria(@PathVariable Long id, @PathVariable Long materiaId) {
+        return service.matricularEmMateria(id, materiaId);
+    }
+
+    @DeleteMapping("/{id}/materias/{materiaId}")
+    public ResponseEntity<AlunoDTO> removerDeMateria(@PathVariable Long id, @PathVariable Long materiaId) {
+        return service.removerDeMateria(id, materiaId);
+    }
+
 
     @GetMapping
     public ResponseEntity<Page<AlunoDTO>> listar(Pageable pageable) {

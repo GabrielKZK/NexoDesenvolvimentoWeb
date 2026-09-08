@@ -2,10 +2,15 @@ package com.nexo.projeto.service;
 
 import com.nexo.projeto.dto.TurmaDto;
 import com.nexo.projeto.dto.mapper.TurmaMapper;
+import com.nexo.projeto.entity.Materia;
+import com.nexo.projeto.entity.ProfessorEntity;
 import com.nexo.projeto.entity.Turma;
+import com.nexo.projeto.repository.MateriaRepository;
+import com.nexo.projeto.repository.ProfessorRepository;
 import com.nexo.projeto.repository.TurmaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,10 +20,14 @@ import java.util.Optional;
 public class TurmaService {
     private final TurmaRepository repository;
     private final TurmaMapper mapper;
+    private final ProfessorRepository professorRepository;
+    private final MateriaRepository materiaRepository;
 
+    @Transactional
     public TurmaDto salvar(TurmaDto dto) {
 
         Turma turma = mapper.toEntity(dto);
+        aplicarProfessor(turma, dto.idProfessor());
 
         return mapper.toDto(repository.save(turma));
     }
@@ -49,6 +58,7 @@ public class TurmaService {
         repository.deleteById(id);
     }
 
+    @Transactional
     public TurmaDto alterar(Long id, TurmaDto dto){
         Optional<Turma> turma = repository.findById(id);
 
@@ -57,8 +67,48 @@ public class TurmaService {
 
         Turma novo = mapper.toEntity(dto);
         novo.setId(id);
+        aplicarProfessor(novo, dto.idProfessor());
 
         return mapper.toDto(repository.save(novo));
+    }
+
+    private void aplicarProfessor(Turma turma, Long idProfessor) {
+        if (idProfessor == null) {
+            turma.setProfessor(null);
+            return;
+        }
+
+        ProfessorEntity professor = professorRepository.findById(idProfessor)
+                .orElseThrow(() -> new IllegalArgumentException("Professor não encontrado com id: " + idProfessor));
+        turma.setProfessor(professor);
+    }
+
+    @Transactional
+    public TurmaDto vincularMateria(Long turmaId, Long materiaId) {
+        Turma turma = repository.findById(turmaId)
+                .orElseThrow(() -> new IllegalArgumentException("Turma não encontrada com id: " + turmaId));
+        Materia materia = materiaRepository.findById(materiaId)
+                .orElseThrow(() -> new IllegalArgumentException("Matéria não encontrada com id: " + materiaId));
+
+        if (!materia.getTurmas().contains(turma)) {
+            materia.getTurmas().add(turma);
+            materiaRepository.save(materia);
+        }
+
+        return mapper.toDto(turma);
+    }
+
+    @Transactional
+    public TurmaDto desvincularMateria(Long turmaId, Long materiaId) {
+        Turma turma = repository.findById(turmaId)
+                .orElseThrow(() -> new IllegalArgumentException("Turma não encontrada com id: " + turmaId));
+        Materia materia = materiaRepository.findById(materiaId)
+                .orElseThrow(() -> new IllegalArgumentException("Matéria não encontrada com id: " + materiaId));
+
+        materia.getTurmas().remove(turma);
+        materiaRepository.save(materia);
+
+        return mapper.toDto(turma);
     }
 
 }

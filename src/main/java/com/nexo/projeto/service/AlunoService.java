@@ -4,7 +4,11 @@ import com.nexo.projeto.dto.AlunoCadastroDTO;
 import com.nexo.projeto.dto.AlunoDTO;
 import com.nexo.projeto.dto.mapper.AlunoMapper;
 import com.nexo.projeto.entity.Aluno;
+import com.nexo.projeto.entity.Materia;
+import com.nexo.projeto.entity.Turma;
 import com.nexo.projeto.repository.AlunoRepository;
+import com.nexo.projeto.repository.MateriaRepository;
+import com.nexo.projeto.repository.TurmaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +35,8 @@ public class AlunoService {
     private final AlunoRepository repository;
     private final AlunoMapper mapper;
     private final PasswordEncoder passwordEncoder;
+    private final TurmaRepository turmaRepository;
+    private final MateriaRepository materiaRepository;
 
 
     @Transactional
@@ -46,6 +52,12 @@ public class AlunoService {
         aluno.setEmailInstitucional(email);
         aluno.setSenha(passwordEncoder.encode(dto.senha()));
         aluno.setMetaSemanalXp(META_SEMANAL_PADRAO);
+
+        if (dto.turmaId() != null) {
+            Turma turma = turmaRepository.findById(dto.turmaId())
+                    .orElseThrow(() -> new IllegalArgumentException("Turma não encontrada com id: " + dto.turmaId()));
+            aluno.setTurma(turma);
+        }
 
         AlunoDTO salvo = mapper.toDTO(repository.save(aluno));
         return ResponseEntity.created(URI.create("/api/alunos/" + salvo.id())).body(salvo);
@@ -67,6 +79,48 @@ public class AlunoService {
         aluno.setNome(dto.nome().trim());
         aluno.setEmailInstitucional(email);
         aluno.setFoto(dto.foto());
+
+        if (dto.turmaId() != null) {
+            Turma turma = turmaRepository.findById(dto.turmaId())
+                    .orElseThrow(() -> new IllegalArgumentException("Turma não encontrada com id: " + dto.turmaId()));
+            aluno.setTurma(turma);
+        }
+
+        return ResponseEntity.ok(mapper.toDTO(aluno));
+    }
+
+    @Transactional
+    public ResponseEntity<AlunoDTO> matricularEmMateria(Long id, Long materiaId) {
+        Optional<Aluno> encontrado = repository.findById(id);
+        if (encontrado.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Materia materia = materiaRepository.findById(materiaId)
+                .orElseThrow(() -> new IllegalArgumentException("Matéria não encontrada com id: " + materiaId));
+
+        Aluno aluno = encontrado.get();
+        if (!materia.getAlunos().contains(aluno)) {
+            materia.getAlunos().add(aluno);
+            materiaRepository.save(materia);
+        }
+
+        return ResponseEntity.ok(mapper.toDTO(aluno));
+    }
+
+    @Transactional
+    public ResponseEntity<AlunoDTO> removerDeMateria(Long id, Long materiaId) {
+        Optional<Aluno> encontrado = repository.findById(id);
+        if (encontrado.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Materia materia = materiaRepository.findById(materiaId)
+                .orElseThrow(() -> new IllegalArgumentException("Matéria não encontrada com id: " + materiaId));
+
+        Aluno aluno = encontrado.get();
+        materia.getAlunos().remove(aluno);
+        materiaRepository.save(materia);
 
         return ResponseEntity.ok(mapper.toDTO(aluno));
     }

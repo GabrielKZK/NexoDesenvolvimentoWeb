@@ -2,6 +2,8 @@ package com.nexo.projeto.dto;
 
 import jakarta.validation.constraints.NotNull;
 
+import java.util.List;
+
 public record TurmaDto (
     Long id,
     @NotNull(message = "A turma deve possuir um nome")
@@ -11,7 +13,7 @@ public record TurmaDto (
     @NotNull(message = "A turma deve possuir um turno")
     String turno,
     Long idProfessor,
-    String nomeProfessor
-
+    String nomeProfessor,
+    List<Long> materiaIds
 
 ){}
