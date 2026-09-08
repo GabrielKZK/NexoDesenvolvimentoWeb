@@ -26,7 +26,11 @@ public class Turma {
 
     private Integer anoLetivo;
 
-    private String turno;
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @ManyToOne
+    @JoinColumn(name = "turno_id")
+    private TurnoEntity turno;
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

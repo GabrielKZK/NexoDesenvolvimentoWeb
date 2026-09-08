@@ -16,11 +16,19 @@ public class TurmaMapper {
             nomeProfessor = t.getProfessor().getNome();
         }
 
+        Long idTurno = null;
+        String nomeTurno = null;
+        if (t.getTurno() != null) {
+            idTurno = t.getTurno().getId();
+            nomeTurno = t.getTurno().getNome();
+        }
+
         return new TurmaDto(
                 t.getId(),
                 t.getNome(),
                 t.getAnoLetivo(),
-                t.getTurno(),
+                idTurno,
+                nomeTurno,
                 idProfessor,
                 nomeProfessor,
                 t.getMaterias().stream().map(Materia::getId).toList()
@@ -33,7 +41,6 @@ public class TurmaMapper {
         t.setId(dto.id());
         t.setNome(dto.nome());
         t.setAnoLetivo(dto.anoLetivo());
-        t.setTurno(dto.turno());
 
         return t;
     }

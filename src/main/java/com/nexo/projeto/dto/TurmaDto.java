@@ -10,8 +10,8 @@ public record TurmaDto (
     String nome,
     @NotNull(message = "A turma deve ser de um ano letivo")
     Integer anoLetivo,
-    @NotNull(message = "A turma deve possuir um turno")
-    String turno,
+    Long idTurno,
+    String nomeTurno,
     Long idProfessor,
     String nomeProfessor,
     List<Long> materiaIds

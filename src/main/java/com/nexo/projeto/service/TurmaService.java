@@ -5,9 +5,11 @@ import com.nexo.projeto.dto.mapper.TurmaMapper;
 import com.nexo.projeto.entity.Materia;
 import com.nexo.projeto.entity.ProfessorEntity;
 import com.nexo.projeto.entity.Turma;
+import com.nexo.projeto.entity.TurnoEntity;
 import com.nexo.projeto.repository.MateriaRepository;
 import com.nexo.projeto.repository.ProfessorRepository;
 import com.nexo.projeto.repository.TurmaRepository;
+import com.nexo.projeto.repository.TurnoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,12 +24,14 @@ public class TurmaService {
     private final TurmaMapper mapper;
     private final ProfessorRepository professorRepository;
     private final MateriaRepository materiaRepository;
+    private final TurnoRepository turnoRepository;
 
     @Transactional
     public TurmaDto salvar(TurmaDto dto) {
 
         Turma turma = mapper.toEntity(dto);
         aplicarProfessor(turma, dto.idProfessor());
+        aplicarTurno(turma, dto.idTurno());
 
         return mapper.toDto(repository.save(turma));
     }
@@ -68,6 +72,7 @@ public class TurmaService {
         Turma novo = mapper.toEntity(dto);
         novo.setId(id);
         aplicarProfessor(novo, dto.idProfessor());
+        aplicarTurno(novo, dto.idTurno());
 
         return mapper.toDto(repository.save(novo));
     }
@@ -81,6 +86,17 @@ public class TurmaService {
         ProfessorEntity professor = professorRepository.findById(idProfessor)
                 .orElseThrow(() -> new IllegalArgumentException("Professor não encontrado com id: " + idProfessor));
         turma.setProfessor(professor);
+    }
+
+    private void aplicarTurno(Turma turma, Long idTurno) {
+        if (idTurno == null) {
+            turma.setTurno(null);
+            return;
+        }
+
+        TurnoEntity turno = turnoRepository.findById(idTurno)
+                .orElseThrow(() -> new IllegalArgumentException("Turno não encontrado com id: " + idTurno));
+        turma.setTurno(turno);
     }
 
     @Transactional
