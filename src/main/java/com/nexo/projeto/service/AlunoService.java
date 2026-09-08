@@ -14,7 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +33,6 @@ public class AlunoService {
 
     private final AlunoRepository repository;
     private final AlunoMapper mapper;
-    private final PasswordEncoder passwordEncoder;
     private final TurmaRepository turmaRepository;
     private final MateriaRepository materiaRepository;
 
@@ -50,7 +48,7 @@ public class AlunoService {
         Aluno aluno = mapper.toEntity(dto);
         aluno.setNome(dto.nome().trim());
         aluno.setEmailInstitucional(email);
-        aluno.setSenha(passwordEncoder.encode(dto.senha()));
+        aluno.setSenha(dto.senha());
         aluno.setMetaSemanalXp(META_SEMANAL_PADRAO);
 
         if (dto.turmaId() != null) {
@@ -133,21 +131,21 @@ public class AlunoService {
         }
 
         Aluno aluno = encontrado.get();
-        if (!passwordEncoder.matches(senhaAtual, aluno.getSenha())) {
+        if (!aluno.getSenha().equals(senhaAtual)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        if (passwordEncoder.matches(novaSenha, aluno.getSenha())) {
+        if (aluno.getSenha().equals(novaSenha)) {
             return ResponseEntity.badRequest().build();
         }
 
-        aluno.setSenha(passwordEncoder.encode(novaSenha));
+        aluno.setSenha(novaSenha);
         return ResponseEntity.noContent().build();
     }
 
     public ResponseEntity<AlunoDTO> autenticar(String emailInstitucional, String senha) {
         Optional<Aluno> encontrado = repository.findByEmailInstitucional(normalizarEmail(emailInstitucional));
 
-        if (encontrado.isEmpty() || !passwordEncoder.matches(senha, encontrado.get().getSenha())) {
+        if (encontrado.isEmpty() || !encontrado.get().getSenha().equals(senha)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
