@@ -124,6 +124,8 @@ public class TurmaService {
         materia.getTurmas().remove(turma);
         materiaRepository.save(materia);
 
+
+
         return mapper.toDto(turma);
     }
 
