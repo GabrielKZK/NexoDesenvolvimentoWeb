@@ -10,6 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/turma")
+@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class TurmaController {
     public final TurmaService service;
@@ -39,8 +40,8 @@ public class TurmaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/{nome}")
-    public ResponseEntity<List<TurmaDto>> buscaPorNome(@PathVariable String nome){
+    @GetMapping(params = "nome")
+    public ResponseEntity<List<TurmaDto>> buscaPorNome(@RequestParam String nome){
         List<TurmaDto> lista = service.buscaPorNome(nome);
 
         if (lista.isEmpty())
