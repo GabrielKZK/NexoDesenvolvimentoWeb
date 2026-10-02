@@ -4,6 +4,7 @@ import com.nexo.projeto.dto.AlteracaoSenhaDTO;
 import com.nexo.projeto.dto.AlunoCadastroDTO;
 import com.nexo.projeto.dto.AlunoDTO;
 import com.nexo.projeto.dto.LoginDTO;
+import com.nexo.projeto.dto.RedefinicaoSenhaDTO;
 import com.nexo.projeto.service.AlunoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -51,21 +52,15 @@ public class AlunoController {
         return service.alterarSenha(id, dto.senhaAtual(), dto.novaSenha());
     }
 
+    @PatchMapping("/senha/redefinir")
+    public ResponseEntity<Void> redefinirSenha(@Valid @RequestBody RedefinicaoSenhaDTO dto) {
+        return service.redefinirSenha(dto.emailInstitucional(), dto.novaSenha());
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         return service.deletar(id);
     }
-
-    @PostMapping("/{id}/materias/{materiaId}")
-    public ResponseEntity<AlunoDTO> matricularEmMateria(@PathVariable Long id, @PathVariable Long materiaId) {
-        return service.matricularEmMateria(id, materiaId);
-    }
-
-    @DeleteMapping("/{id}/materias/{materiaId}")
-    public ResponseEntity<AlunoDTO> removerDeMateria(@PathVariable Long id, @PathVariable Long materiaId) {
-        return service.removerDeMateria(id, materiaId);
-    }
-
 
     @GetMapping
     public ResponseEntity<Page<AlunoDTO>> listar(Pageable pageable) {
