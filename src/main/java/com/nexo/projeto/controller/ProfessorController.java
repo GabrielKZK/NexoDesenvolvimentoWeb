@@ -1,7 +1,9 @@
 package com.nexo.projeto.controller;
 
 import com.nexo.projeto.dto.ProfessorDto;
+import com.nexo.projeto.dto.ProfessorLoginDTO;
 import com.nexo.projeto.service.ProfessorService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +34,11 @@ public class ProfessorController {
         return ResponseEntity.status(HttpStatus.CREATED).body(criado);
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<ProfessorDto> login(@Valid @RequestBody ProfessorLoginDTO dto) {
+        return professorService.autenticar(dto.email(), dto.senha());
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ProfessorDto> atualizar(@PathVariable Long id, @RequestBody ProfessorDto dto) {
         return ResponseEntity.ok(professorService.atualizar(id, dto));
@@ -41,5 +48,10 @@ public class ProfessorController {
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         professorService.deletar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> tratarIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 }

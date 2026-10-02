@@ -5,10 +5,13 @@ import com.nexo.projeto.dto.mapper.ProfessorMapper;
 import com.nexo.projeto.entity.ProfessorEntity;
 import com.nexo.projeto.repository.ProfessorRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -61,6 +64,20 @@ public class ProfessorService {
 
         ProfessorEntity atualizado = professorRepository.save(existente);
         return professorMapper.toDto(atualizado);
+    }
+
+    @Transactional(readOnly = true)
+    public ResponseEntity<ProfessorDto> autenticar(String email, String senha) {
+        Optional<ProfessorEntity> encontrado = professorRepository.findByEmail(email);
+
+        if (encontrado.isEmpty() || !encontrado.get().getSenha().equals(senha)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        if (Boolean.FALSE.equals(encontrado.get().getAtivo())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        return ResponseEntity.ok(professorMapper.toDto(encontrado.get()));
     }
 
     @Transactional
