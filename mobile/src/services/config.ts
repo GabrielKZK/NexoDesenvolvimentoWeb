@@ -1,26 +1,43 @@
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
+
+const API_PORT = 8080;
 
 /**
- * Endereço do backend Spring Boot (porta padrão 8080, sem context-path).
- *
- * - Emulador Android: usa 10.0.2.2 (alias da máquina host dentro do emulador).
- * - iOS Simulator / Web: localhost funciona normalmente.
- * - Celular físico: troque pelo IP da sua máquina na rede local, ex: 'http://192.168.0.10:8080'.
- *
- * IP atual (Wi-Fi) desta máquina, detectado em 2026-10-01: 172.20.141.77
- * Se você trocar de rede (ex: outro Wi-Fi, outra sala), rode `ipconfig` de novo
- * e atualize o valor abaixo.
+ * Só preencha se a detecção automática não funcionar (ex: '192.168.0.10').
+ * Deixe vazio para o app descobrir sozinho o IP do computador.
  */
-const LAN_IP = '172.20.141.77'; // <- IP da sua máquina para testar em um aparelho físico
+const LAN_IP_OVERRIDE = '';
+
+/**
+ * Host do computador que serve o app (Metro/Expo). Em celular físico com Expo Go
+ * o `hostUri` vem como "192.168.0.10:8081", então reaproveitamos o IP — assim não
+ * precisa editar nada quando a rede/IP mudar.
+ */
+function getDevServerHost(): string | null {
+  const hostUri = Constants.expoConfig?.hostUri;
+  if (!hostUri) return null;
+  const host = hostUri.split(':')[0];
+  return host || null;
+}
 
 function resolveBaseUrl(): string {
-  if (LAN_IP) {
-    return `http://${LAN_IP}:8080`;
+  if (LAN_IP_OVERRIDE) {
+    return `http://${LAN_IP_OVERRIDE}:${API_PORT}`;
   }
+
+  const devHost = getDevServerHost();
+  if (devHost && devHost !== 'localhost' && devHost !== '127.0.0.1') {
+    return `http://${devHost}:${API_PORT}`;
+  }
+
+  // Emulador Android acessa o "localhost" do computador via 10.0.2.2.
   if (Platform.OS === 'android') {
-    return 'http://10.0.2.2:8080';
+    return `http://10.0.2.2:${API_PORT}`;
   }
-  return 'http://localhost:8080';
+
+  // iOS Simulator e Web acessam o computador por localhost.
+  return `http://localhost:${API_PORT}`;
 }
 
 export const API_BASE_URL = resolveBaseUrl();
