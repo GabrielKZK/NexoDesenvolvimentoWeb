@@ -10,7 +10,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/turma")
-@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class TurmaController {
     public final TurmaService service;
