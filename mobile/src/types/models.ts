@@ -27,15 +27,21 @@ export interface Materia {
 }
 
 export interface Turma {
-  id: number;
+  id?: number;
   nome: string;
   anoLetivo: number;
   idTurno?: number | null;
-  nomeTurno?: string | null;
+  nomeTurno?: string;
   idProfessor?: number | null;
-  nomeProfessor?: string | null;
+  nomeProfessor?: string;
   materiaIds?: number[];
 }
+
+export type RootStackParamList = {
+  ListagemTurmas: undefined;
+  CadastroTurma: undefined;
+  DetalhesTurma: { turma: Turma };
+};
 
 export type ProfessorInput = Omit<Professor, 'id' | 'localDateTime'> & { id?: number };
 export type TurnoInput = Omit<Turno, 'id' | 'dataCadastro'> & { id?: number };
