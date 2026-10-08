@@ -113,6 +113,13 @@ export function createStyles(theme: ThemeColors) {
       paddingVertical: 14,
       alignItems: "center",
     },
+    materiasButton: {
+      backgroundColor: brand.purple,
+      borderRadius: 10,
+      paddingVertical: 14,
+      alignItems: "center",
+      marginBottom: 4,
+    },
     buttonDisabled: {
       backgroundColor: theme.border,
     },

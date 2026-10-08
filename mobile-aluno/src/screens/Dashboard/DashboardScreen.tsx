@@ -23,6 +23,7 @@ export default function DashboardScreen({
   aluno,
   onAlunoChange,
   onLogout,
+  onGoToMaterias,
 }: DashboardScreenProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -110,6 +111,10 @@ export default function DashboardScreen({
               <Text style={styles.statLabel}>dias de ofensiva</Text>
             </View>
           </View>
+
+          <TouchableOpacity style={styles.materiasButton} onPress={onGoToMaterias}>
+            <Text style={styles.buttonText}>📚 Minhas matérias</Text>
+          </TouchableOpacity>
 
           <Text style={styles.sectionTitle}>Meta semanal</Text>
           <View style={styles.progressBarBackground}>
