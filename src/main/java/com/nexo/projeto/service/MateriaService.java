@@ -3,8 +3,8 @@ package com.nexo.projeto.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import com.nexo.projeto.dto.MateriaDto;
-import com.nexo.projeto.dto.mapper.MaterialMapper;
+import com.nexo.projeto.dto.MateriaDTO;
+import com.nexo.projeto.dto.mapper.MateriaMapper;
 import com.nexo.projeto.entity.Materia;
 import com.nexo.projeto.repository.MateriaRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,27 +18,27 @@ import java.util.Optional;
 public class MateriaService {
 
     private final MateriaRepository repository;
-    private final MaterialMapper mapper;
+    private final MateriaMapper mapper;
 
-    public MateriaDto salvar(MateriaDto m) {
+    public MateriaDTO salvar(MateriaDTO m) {
 
         Materia e = mapper.toEntity(m);
 
-        return mapper.toDto(repository.save(e));
+        return mapper.toDTO(repository.save(e));
     }
 
     public List<Materia> listarTodas() {
         return repository.findAll();
     }
 
-    public Optional<MateriaDto> buscarPorId(Long id) {
+    public Optional<MateriaDTO> buscarPorId(Long id) {
         Optional<Materia> materia = repository.findById(id);
 
         if (materia.isEmpty()) {
             return Optional.empty();
         }
 
-        return Optional.of(mapper.toDto(materia.get()));
+        return Optional.of(mapper.toDTO(materia.get()));
     }
 
     public void excluir(Long id) {
@@ -49,7 +49,7 @@ public class MateriaService {
         return repository.findByNomeLike(nome);
     }
 
-    public MateriaDto alterar(Long id, MateriaDto dto) {
+    public MateriaDTO alterar(Long id, MateriaDTO dto) {
         Optional<Materia> materiaExistente = repository.findById(id);
 
         if (materiaExistente.isEmpty()) {
@@ -59,6 +59,6 @@ public class MateriaService {
         Materia materiaAtualizada = mapper.toEntity(dto);
         materiaAtualizada.setId(id);
 
-        return mapper.toDto(repository.save(materiaAtualizada));
+        return mapper.toDTO(repository.save(materiaAtualizada));
     }
 }

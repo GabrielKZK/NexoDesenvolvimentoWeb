@@ -20,31 +20,31 @@ function normalizar(raw: any): Materia {
 
 export const materiaService = {
   listarTodas: async (): Promise<Materia[]> => {
-    const { data } = await api.get<any[]>('/materias');
+    const { data } = await api.get<any[]>('/api/materias');
     return Array.isArray(data) ? data.map(normalizar) : [];
   },
 
   buscarPorId: async (id: number): Promise<Materia> => {
-    const { data } = await api.get<any>(`/materias/${id}`);
+    const { data } = await api.get<any>(`/api/materias/${id}`);
     return normalizar(data);
   },
 
   buscarPorNome: async (nome: string): Promise<Materia[]> => {
-    const { data } = await api.get<any[]>('/materias/nome', { params: { nome } });
+    const { data } = await api.get<any[]>('/api/materias/nome', { params: { nome } });
     return Array.isArray(data) ? data.map(normalizar) : [];
   },
 
   criar: async (dto: MateriaInput): Promise<Materia> => {
-    const { data } = await api.post<any>('/materias', dto);
+    const { data } = await api.post<any>('/api/materias', dto);
     return normalizar(data);
   },
 
   alterar: async (id: number, dto: MateriaInput): Promise<Materia> => {
-    const { data } = await api.put<any>(`/materias/${id}`, dto);
+    const { data } = await api.put<any>(`/api/materias/${id}`, dto);
     return normalizar(data);
   },
 
   excluir: async (id: number): Promise<void> => {
-    await api.delete(`/materias/${id}`);
+    await api.delete(`/api/materias/${id}`);
   },
 };

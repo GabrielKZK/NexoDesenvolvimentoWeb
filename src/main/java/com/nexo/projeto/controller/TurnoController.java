@@ -1,6 +1,6 @@
 package com.nexo.projeto.controller;
 
-import com.nexo.projeto.dto.TurnoDto;
+import com.nexo.projeto.dto.TurnoDTO;
 import com.nexo.projeto.service.TurnoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,23 +17,23 @@ public class TurnoController {
     private final TurnoService turnoService;
 
     @GetMapping
-    public ResponseEntity<List<TurnoDto>> listarTodos() {
+    public ResponseEntity<List<TurnoDTO>> listarTodos() {
         return ResponseEntity.ok(turnoService.listarTodos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TurnoDto> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<TurnoDTO> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(turnoService.buscarPorId(id));
     }
 
     @PostMapping
-    public ResponseEntity<TurnoDto> criar(@RequestBody TurnoDto dto) {
-        TurnoDto criado = turnoService.criar(dto);
+    public ResponseEntity<TurnoDTO> criar(@RequestBody TurnoDTO dto) {
+        TurnoDTO criado = turnoService.criar(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(criado);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TurnoDto> atualizar(@PathVariable Long id, @RequestBody TurnoDto dto) {
+    public ResponseEntity<TurnoDTO> atualizar(@PathVariable Long id, @RequestBody TurnoDTO dto) {
         return ResponseEntity.ok(turnoService.atualizar(id, dto));
     }
 

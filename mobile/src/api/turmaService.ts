@@ -1,39 +1,39 @@
 import { api } from './client';
 import { Turma, TurmaInput } from '../types/models';
 
-// Rotas espelham TurmaController: @RequestMapping("/turma")
+// Rotas espelham TurmaController: @RequestMapping("/api/turmas")
 export const turmaService = {
   listarTodas: async (): Promise<Turma[]> => {
-    const { data } = await api.get<Turma[]>('/turma');
+    const { data } = await api.get<Turma[]>('/api/turmas');
     return Array.isArray(data) ? data : [];
   },
 
   buscarPorId: async (id: number): Promise<Turma> => {
-    const { data } = await api.get<Turma>(`/turma/${id}`);
+    const { data } = await api.get<Turma>(`/api/turmas/${id}`);
     return data;
   },
 
   criar: async (dto: TurmaInput): Promise<Turma> => {
-    const { data } = await api.post<Turma>('/turma', dto);
+    const { data } = await api.post<Turma>('/api/turmas', dto);
     return data;
   },
 
   alterar: async (id: number, dto: TurmaInput): Promise<Turma> => {
-    const { data } = await api.put<Turma>(`/turma/${id}`, dto);
+    const { data } = await api.put<Turma>(`/api/turmas/${id}`, dto);
     return data;
   },
 
   excluir: async (id: number): Promise<void> => {
-    await api.delete(`/turma/${id}`);
+    await api.delete(`/api/turmas/${id}`);
   },
 
   vincularMateria: async (turmaId: number, materiaId: number): Promise<Turma> => {
-    const { data } = await api.post<Turma>(`/turma/${turmaId}/materias/${materiaId}`);
+    const { data } = await api.post<Turma>(`/api/turmas/${turmaId}/materias/${materiaId}`);
     return data;
   },
 
   desvincularMateria: async (turmaId: number, materiaId: number): Promise<Turma> => {
-    const { data } = await api.delete<Turma>(`/turma/${turmaId}/materias/${materiaId}`);
+    const { data } = await api.delete<Turma>(`/api/turmas/${turmaId}/materias/${materiaId}`);
     return data;
   },
 

@@ -1,16 +1,16 @@
 package com.nexo.projeto.dto.mapper;
 
-import com.nexo.projeto.dto.ProfessorDto;
+import com.nexo.projeto.dto.ProfessorDTO;
 import com.nexo.projeto.entity.ProfessorEntity;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ProfessorMapper {
 
-    public ProfessorDto toDto(ProfessorEntity entity){
+    public ProfessorDTO toDTO(ProfessorEntity entity){
         if (entity == null){
             return null;
-        }return new ProfessorDto(
+        }return new ProfessorDTO(
                 entity.getId(),
                 entity.getNome(),
                 entity.getEmail(),
@@ -23,7 +23,7 @@ public class ProfessorMapper {
         );
     }
 
-    public ProfessorEntity toEntity(ProfessorDto dto){
+    public ProfessorEntity toEntity(ProfessorDTO dto){
         if (dto == null){
             return null;
         }return ProfessorEntity.builder()

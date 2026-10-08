@@ -2,7 +2,7 @@ package com.nexo.projeto.dto;
 
 import java.time.LocalDateTime;
 
-public record ProfessorDto(
+public record ProfessorDTO(
         Long id,
         String nome,
         String email,

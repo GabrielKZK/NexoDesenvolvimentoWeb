@@ -30,7 +30,7 @@ O backend Spring Boot roda por padrão em `http://localhost:8080` (sem context-p
 - **iOS Simulator**: usa `http://localhost:8080` (não precisa mexer em nada).
 - **Celular físico** (Expo Go): edite a constante `LAN_IP` em `src/api/config.ts` com o IP da sua máquina na rede local (ex.: `'192.168.0.10'`). O celular e o computador precisam estar na mesma rede Wi-Fi.
 
-Lembre-se de deixar o backend rodando (`./mvnw spring-boot:run` na raiz do projeto) e o Postgres acessível antes de testar o app.
+Lembre-se de deixar o backend rodando e o Postgres acessível antes de testar o app. A senha do banco não fica no repositório: defina a variável `DB_PASSWORD` (ou copie `application-local.properties.example` para `application-local.properties` na raiz) e rode `./mvnw spring-boot:run`. Os endpoints seguem o padrão `/api/<recurso>` (`/api/turmas`, `/api/materias`, `/api/professores`, `/api/turnos`, `/api/alunos`).
 
 ## ⚠️ Sobre o login do professor
 

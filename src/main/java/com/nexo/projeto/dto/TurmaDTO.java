@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
-public record TurmaDto (
+public record TurmaDTO (
     Long id,
     @NotNull(message = "A turma deve possuir um nome")
     String nome,

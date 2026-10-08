@@ -1,0 +1,4 @@
+# Copie para application-local.properties (ignorado pelo git) e ajuste.
+spring.datasource.url=jdbc:postgresql://localhost:5432/projeto
+spring.datasource.username=postgres
+spring.datasource.password=troque-esta-senha

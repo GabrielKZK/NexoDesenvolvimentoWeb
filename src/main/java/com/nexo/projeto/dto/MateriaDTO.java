@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 
 import java.util.List;
 
-public record MateriaDto(
+public record MateriaDTO(
         Long id,
         @NotBlank(message="Nome não pode estar vazio")
         String nome,

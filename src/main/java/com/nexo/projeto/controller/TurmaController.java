@@ -1,6 +1,6 @@
 package com.nexo.projeto.controller;
 
-import com.nexo.projeto.dto.TurmaDto;
+import com.nexo.projeto.dto.TurmaDTO;
 import com.nexo.projeto.service.TurmaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -9,14 +9,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/turma")
+@RequestMapping("/api/turmas")
 @RequiredArgsConstructor
 public class TurmaController {
     public final TurmaService service;
 
     @PostMapping
-    public ResponseEntity<TurmaDto> salvar(@RequestBody TurmaDto dto){
-        TurmaDto novo = service.salvar(dto);
+    public ResponseEntity<TurmaDTO> salvar(@RequestBody TurmaDTO dto){
+        TurmaDTO novo = service.salvar(dto);
         if (novo == null)
             return ResponseEntity.unprocessableContent().build();
 
@@ -24,8 +24,8 @@ public class TurmaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TurmaDto>> listaTodas(){
-        List<TurmaDto> lista = service.listaTodas();
+    public ResponseEntity<List<TurmaDTO>> listaTodas(){
+        List<TurmaDTO> lista = service.listaTodas();
 
         if (lista.isEmpty())
             return ResponseEntity.noContent().build();
@@ -34,14 +34,14 @@ public class TurmaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TurmaDto> buscaPorId(@PathVariable Long id){
+    public ResponseEntity<TurmaDTO> buscaPorId(@PathVariable Long id){
         return service.buscarPorId(id).map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping(params = "nome")
-    public ResponseEntity<List<TurmaDto>> buscaPorNome(@RequestParam String nome){
-        List<TurmaDto> lista = service.buscaPorNome(nome);
+    public ResponseEntity<List<TurmaDTO>> buscaPorNome(@RequestParam String nome){
+        List<TurmaDTO> lista = service.buscaPorNome(nome);
 
         if (lista.isEmpty())
             return ResponseEntity.noContent().build();
@@ -56,8 +56,8 @@ public class TurmaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TurmaDto> alterar(@PathVariable Long id, @RequestBody TurmaDto dto){
-        TurmaDto mod = service.alterar(id, dto);
+    public ResponseEntity<TurmaDTO> alterar(@PathVariable Long id, @RequestBody TurmaDTO dto){
+        TurmaDTO mod = service.alterar(id, dto);
 
         if(mod == null)
             return ResponseEntity.unprocessableContent().build();
@@ -66,12 +66,12 @@ public class TurmaController {
     }
 
     @PostMapping("/{turmaId}/materias/{materiaId}")
-    public ResponseEntity<TurmaDto> vincularMateria(@PathVariable Long turmaId, @PathVariable Long materiaId){
+    public ResponseEntity<TurmaDTO> vincularMateria(@PathVariable Long turmaId, @PathVariable Long materiaId){
         return ResponseEntity.ok(service.vincularMateria(turmaId, materiaId));
     }
 
     @DeleteMapping("/{turmaId}/materias/{materiaId}")
-    public ResponseEntity<TurmaDto> desvincularMateria(@PathVariable Long turmaId, @PathVariable Long materiaId){
+    public ResponseEntity<TurmaDTO> desvincularMateria(@PathVariable Long turmaId, @PathVariable Long materiaId){
         return ResponseEntity.ok(service.desvincularMateria(turmaId, materiaId));
     }
 }

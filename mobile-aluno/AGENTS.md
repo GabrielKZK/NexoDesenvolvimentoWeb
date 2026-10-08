@@ -25,9 +25,9 @@ Run lint and typecheck before declaring any task done.
 
 ## Navigation & Routing
 
-- Use **Expo Router** for all navigation. Routes live in `src/app/` — every file there is a screen, `_layout.tsx` files define navigators. Keep non-route code (components, hooks, utils) outside `src/app/`.
-- Import `Link`, `router`, and `useLocalSearchParams` from `expo-router`.
-- Docs: https://docs.expo.dev/router/introduction.md
+- This app intentionally has **no navigation library**: `App.tsx` keeps the current screen in state (`type Tela`) and passes callbacks (`onGoToX`, `onBack`) to each screen. Keep this convention instead of adding Expo Router or React Navigation.
+- Each screen lives in `src/screens/<Feature>/` with `<Feature>Screen.tsx`, `styles.ts` (`createStyles(theme)`) and `types.ts` (props). API calls go in `src/services/`, DTO types in `src/types/`.
+- A new screen needs: a value in `Tela`, a block in `App.tsx`, and a callback prop on the screen that opens it.
 
 ## Building with EAS
 

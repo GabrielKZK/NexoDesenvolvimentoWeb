@@ -1,6 +1,6 @@
 package com.nexo.projeto.service;
 
-import com.nexo.projeto.dto.ProfessorDto;
+import com.nexo.projeto.dto.ProfessorDTO;
 import com.nexo.projeto.dto.mapper.ProfessorMapper;
 import com.nexo.projeto.entity.ProfessorEntity;
 import com.nexo.projeto.repository.ProfessorRepository;
@@ -21,33 +21,33 @@ public class ProfessorService {
     private final ProfessorMapper professorMapper;
 
     @Transactional(readOnly = true)
-    public List<ProfessorDto> listarTodos() {
+    public List<ProfessorDTO> listarTodos() {
         return professorRepository.findAll()
                 .stream()
-                .map(professorMapper::toDto)
+                .map(professorMapper::toDTO)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public ProfessorDto buscarPorId(Long id) {
+    public ProfessorDTO buscarPorId(Long id) {
         ProfessorEntity entity = professorRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Professor não encontrado com id: " + id));
-        return professorMapper.toDto(entity);
+        return professorMapper.toDTO(entity);
     }
 
     @Transactional
-    public ProfessorDto criar(ProfessorDto dto) {
+    public ProfessorDTO criar(ProfessorDTO dto) {
         if (professorRepository.existsByEmail(dto.email())) {
             throw new IllegalArgumentException("Já existe um professor cadastrado com este e-mail");
         }
         ProfessorEntity entity = professorMapper.toEntity(dto);
         entity.setId(null);
         ProfessorEntity salvo = professorRepository.save(entity);
-        return professorMapper.toDto(salvo);
+        return professorMapper.toDTO(salvo);
     }
 
     @Transactional
-    public ProfessorDto atualizar(Long id, ProfessorDto dto) {
+    public ProfessorDTO atualizar(Long id, ProfessorDTO dto) {
         ProfessorEntity existente = professorRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Professor não encontrado com id: " + id));
 
@@ -63,11 +63,11 @@ public class ProfessorService {
         }
 
         ProfessorEntity atualizado = professorRepository.save(existente);
-        return professorMapper.toDto(atualizado);
+        return professorMapper.toDTO(atualizado);
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<ProfessorDto> autenticar(String email, String senha) {
+    public ResponseEntity<ProfessorDTO> autenticar(String email, String senha) {
         Optional<ProfessorEntity> encontrado = professorRepository.findByEmail(email);
 
         if (encontrado.isEmpty() || !encontrado.get().getSenha().equals(senha)) {
@@ -77,7 +77,7 @@ public class ProfessorService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        return ResponseEntity.ok(professorMapper.toDto(encontrado.get()));
+        return ResponseEntity.ok(professorMapper.toDTO(encontrado.get()));
     }
 
     @Transactional

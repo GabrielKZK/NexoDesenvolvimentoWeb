@@ -1,6 +1,6 @@
 package com.nexo.projeto.controller;
 
-import com.nexo.projeto.dto.MateriaDto;
+import com.nexo.projeto.dto.MateriaDTO;
 import com.nexo.projeto.entity.Materia;
 import com.nexo.projeto.service.MateriaService;
 import lombok.RequiredArgsConstructor;
@@ -11,15 +11,15 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/materias")
+@RequestMapping("/api/materias")
 @RequiredArgsConstructor
 public class MateriaController {
 
     private final MateriaService service;
 
     @PostMapping
-    public ResponseEntity<MateriaDto> criar(@RequestBody MateriaDto materia) {
-        MateriaDto salva = service.salvar(materia);
+    public ResponseEntity<MateriaDTO> criar(@RequestBody MateriaDTO materia) {
+        MateriaDTO salva = service.salvar(materia);
 
         if (salva == null) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).build();
@@ -40,7 +40,7 @@ public class MateriaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MateriaDto> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<MateriaDTO> buscarPorId(@PathVariable Long id) {
         return service.buscarPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -66,11 +66,11 @@ public class MateriaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MateriaDto> alterar(
+    public ResponseEntity<MateriaDTO> alterar(
             @PathVariable Long id,
-            @RequestBody MateriaDto dto) {
+            @RequestBody MateriaDTO dto) {
 
-        MateriaDto mod = service.alterar(id, dto);
+        MateriaDTO mod = service.alterar(id, dto);
 
         if (mod == null) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).build();

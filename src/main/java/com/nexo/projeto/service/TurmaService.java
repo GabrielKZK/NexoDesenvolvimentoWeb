@@ -1,6 +1,6 @@
 package com.nexo.projeto.service;
 
-import com.nexo.projeto.dto.TurmaDto;
+import com.nexo.projeto.dto.TurmaDTO;
 import com.nexo.projeto.dto.mapper.TurmaMapper;
 import com.nexo.projeto.entity.Materia;
 import com.nexo.projeto.entity.ProfessorEntity;
@@ -27,34 +27,34 @@ public class TurmaService {
     private final TurnoRepository turnoRepository;
 
     @Transactional
-    public TurmaDto salvar(TurmaDto dto) {
+    public TurmaDTO salvar(TurmaDTO dto) {
 
         Turma turma = mapper.toEntity(dto);
         aplicarProfessor(turma, dto.idProfessor());
         aplicarTurno(turma, dto.idTurno());
 
-        return mapper.toDto(repository.save(turma));
+        return mapper.toDTO(repository.save(turma));
     }
 
-    public List<TurmaDto> listaTodas() {
+    public List<TurmaDTO> listaTodas() {
         return repository.findAll().stream()
-                .map(mapper::toDto)
+                .map(mapper::toDTO)
                 .toList();
     }
 
-    public Optional<TurmaDto> buscarPorId(Long id) {
+    public Optional<TurmaDTO> buscarPorId(Long id) {
 
         Optional<Turma> turma = repository.findById(id);
 
         if (turma.isEmpty())
             return Optional.empty();
 
-        return Optional.of(mapper.toDto(turma.get()));
+        return Optional.of(mapper.toDTO(turma.get()));
     }
 
-    public List<TurmaDto> buscaPorNome(String nome){
+    public List<TurmaDTO> buscaPorNome(String nome){
         return repository.findAllByNomeLike(nome).stream()
-                .map(mapper::toDto)
+                .map(mapper::toDTO)
                 .toList();
     }
 
@@ -63,7 +63,7 @@ public class TurmaService {
     }
 
     @Transactional
-    public TurmaDto alterar(Long id, TurmaDto dto){
+    public TurmaDTO alterar(Long id, TurmaDTO dto){
         Optional<Turma> turma = repository.findById(id);
 
         if (turma.isEmpty())
@@ -74,7 +74,7 @@ public class TurmaService {
         aplicarProfessor(novo, dto.idProfessor());
         aplicarTurno(novo, dto.idTurno());
 
-        return mapper.toDto(repository.save(novo));
+        return mapper.toDTO(repository.save(novo));
     }
 
     private void aplicarProfessor(Turma turma, Long idProfessor) {
@@ -100,7 +100,7 @@ public class TurmaService {
     }
 
     @Transactional
-    public TurmaDto vincularMateria(Long turmaId, Long materiaId) {
+    public TurmaDTO vincularMateria(Long turmaId, Long materiaId) {
         Turma turma = repository.findById(turmaId)
                 .orElseThrow(() -> new IllegalArgumentException("Turma não encontrada com id: " + turmaId));
         Materia materia = materiaRepository.findById(materiaId)
@@ -111,11 +111,11 @@ public class TurmaService {
             materiaRepository.save(materia);
         }
 
-        return mapper.toDto(turma);
+        return mapper.toDTO(turma);
     }
 
     @Transactional
-    public TurmaDto desvincularMateria(Long turmaId, Long materiaId) {
+    public TurmaDTO desvincularMateria(Long turmaId, Long materiaId) {
         Turma turma = repository.findById(turmaId)
                 .orElseThrow(() -> new IllegalArgumentException("Turma não encontrada com id: " + turmaId));
         Materia materia = materiaRepository.findById(materiaId)
@@ -126,7 +126,7 @@ public class TurmaService {
 
 
 
-        return mapper.toDto(turma);
+        return mapper.toDTO(turma);
     }
 
 }

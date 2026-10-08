@@ -1,16 +1,16 @@
 package com.nexo.projeto.dto.mapper;
 
-import com.nexo.projeto.dto.MateriaDto;
+import com.nexo.projeto.dto.MateriaDTO;
 import com.nexo.projeto.entity.Aluno;
 import com.nexo.projeto.entity.Materia;
 import com.nexo.projeto.entity.Turma;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MaterialMapper {
-    public MateriaDto toDto(Materia m){
+public class MateriaMapper {
+    public MateriaDTO toDTO(Materia m){
 
-        return new MateriaDto(
+        return new MateriaDTO(
                 m.getId(),
                 m.getNome(),
                 m.getSegmento(),
@@ -19,7 +19,7 @@ public class MaterialMapper {
                 ;
     }
 
-    public Materia toEntity(MateriaDto dto) {
+    public Materia toEntity(MateriaDTO dto) {
         if (dto == null)
             return null;
 

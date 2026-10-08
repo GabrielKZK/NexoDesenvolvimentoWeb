@@ -1,6 +1,6 @@
 package com.nexo.projeto.service;
 
-import com.nexo.projeto.dto.TurnoDto;
+import com.nexo.projeto.dto.TurnoDTO;
 import com.nexo.projeto.dto.mapper.TurnoMapper;
 import com.nexo.projeto.entity.TurnoEntity;
 import com.nexo.projeto.repository.TurnoRepository;
@@ -18,33 +18,33 @@ public class TurnoService {
     private final TurnoMapper turnoMapper;
 
     @Transactional(readOnly = true)
-    public List<TurnoDto> listarTodos() {
+    public List<TurnoDTO> listarTodos() {
         return turnoRepository.findAll()
                 .stream()
-                .map(turnoMapper::toDto)
+                .map(turnoMapper::toDTO)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public TurnoDto buscarPorId(Long id) {
+    public TurnoDTO buscarPorId(Long id) {
         TurnoEntity entity = turnoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Turno não encontrado com id: " + id));
-        return turnoMapper.toDto(entity);
+        return turnoMapper.toDTO(entity);
     }
 
     @Transactional
-    public TurnoDto criar(TurnoDto dto) {
+    public TurnoDTO criar(TurnoDTO dto) {
         if (turnoRepository.existsByNome(dto.nome())) {
             throw new IllegalArgumentException("Já existe um turno cadastrado com este nome");
         }
         TurnoEntity entity = turnoMapper.toEntity(dto);
         entity.setId(null);
         TurnoEntity salvo = turnoRepository.save(entity);
-        return turnoMapper.toDto(salvo);
+        return turnoMapper.toDTO(salvo);
     }
 
     @Transactional
-    public TurnoDto atualizar(Long id, TurnoDto dto) {
+    public TurnoDTO atualizar(Long id, TurnoDTO dto) {
         TurnoEntity existente = turnoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Turno não encontrado com id: " + id));
 
@@ -56,7 +56,7 @@ public class TurnoService {
         }
 
         TurnoEntity atualizado = turnoRepository.save(existente);
-        return turnoMapper.toDto(atualizado);
+        return turnoMapper.toDTO(atualizado);
     }
 
     @Transactional

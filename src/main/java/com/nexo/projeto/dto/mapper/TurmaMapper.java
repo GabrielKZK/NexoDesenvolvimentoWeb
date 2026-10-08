@@ -1,6 +1,6 @@
 package com.nexo.projeto.dto.mapper;
 
-import com.nexo.projeto.dto.TurmaDto;
+import com.nexo.projeto.dto.TurmaDTO;
 import com.nexo.projeto.entity.Materia;
 import com.nexo.projeto.entity.Turma;
 import org.springframework.stereotype.Component;
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class TurmaMapper {
 
-    public TurmaDto toDto(Turma t) {
+    public TurmaDTO toDTO(Turma t) {
         Long idProfessor = null;
         String nomeProfessor = null;
         if (t.getProfessor() != null) {
@@ -23,7 +23,7 @@ public class TurmaMapper {
             nomeTurno = t.getTurno().getNome();
         }
 
-        return new TurmaDto(
+        return new TurmaDTO(
                 t.getId(),
                 t.getNome(),
                 t.getAnoLetivo(),
@@ -35,7 +35,7 @@ public class TurmaMapper {
         );
     }
 
-    public Turma toEntity(TurmaDto dto){
+    public Turma toEntity(TurmaDTO dto){
         Turma t = new Turma();
 
         t.setId(dto.id());

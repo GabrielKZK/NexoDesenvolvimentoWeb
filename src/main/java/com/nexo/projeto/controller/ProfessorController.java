@@ -1,6 +1,6 @@
 package com.nexo.projeto.controller;
 
-import com.nexo.projeto.dto.ProfessorDto;
+import com.nexo.projeto.dto.ProfessorDTO;
 import com.nexo.projeto.dto.ProfessorLoginDTO;
 import com.nexo.projeto.service.ProfessorService;
 import jakarta.validation.Valid;
@@ -19,28 +19,28 @@ public class ProfessorController {
     private final ProfessorService professorService;
 
     @GetMapping
-    public ResponseEntity<List<ProfessorDto>> listarTodos() {
+    public ResponseEntity<List<ProfessorDTO>> listarTodos() {
         return ResponseEntity.ok(professorService.listarTodos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProfessorDto> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<ProfessorDTO> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(professorService.buscarPorId(id));
     }
 
     @PostMapping
-    public ResponseEntity<ProfessorDto> criar(@RequestBody ProfessorDto dto) {
-        ProfessorDto criado = professorService.criar(dto);
+    public ResponseEntity<ProfessorDTO> criar(@RequestBody ProfessorDTO dto) {
+        ProfessorDTO criado = professorService.criar(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(criado);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ProfessorDto> login(@Valid @RequestBody ProfessorLoginDTO dto) {
+    public ResponseEntity<ProfessorDTO> login(@Valid @RequestBody ProfessorLoginDTO dto) {
         return professorService.autenticar(dto.email(), dto.senha());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProfessorDto> atualizar(@PathVariable Long id, @RequestBody ProfessorDto dto) {
+    public ResponseEntity<ProfessorDTO> atualizar(@PathVariable Long id, @RequestBody ProfessorDTO dto) {
         return ResponseEntity.ok(professorService.atualizar(id, dto));
     }
 

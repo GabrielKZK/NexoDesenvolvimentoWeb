@@ -1,17 +1,17 @@
 package com.nexo.projeto.dto.mapper;
 
-import com.nexo.projeto.dto.TurnoDto;
+import com.nexo.projeto.dto.TurnoDTO;
 import com.nexo.projeto.entity.TurnoEntity;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TurnoMapper {
 
-    public TurnoDto toDto(TurnoEntity entity) {
+    public TurnoDTO toDTO(TurnoEntity entity) {
         if (entity == null) {
             return null;
         }
-        return new TurnoDto(
+        return new TurnoDTO(
                 entity.getId(),
                 entity.getNome(),
                 entity.getHoraInicio(),
@@ -21,7 +21,7 @@ public class TurnoMapper {
         );
     }
 
-    public TurnoEntity toEntity(TurnoDto dto) {
+    public TurnoEntity toEntity(TurnoDTO dto) {
         if (dto == null) {
             return null;
         }
