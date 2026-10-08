@@ -1,18 +1,19 @@
-import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '../../context/AuthContext';
-import { useAppTheme } from '../../theme/ThemeContext';
+import { useAuth } from '../../hooks/useAuth';
+import { useAppTheme } from '../../hooks/useAppTheme';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { Card } from '../../components/Card';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 import { Badge } from '../../components/Badge';
-import { professorService } from '../../api/professorService';
-import { getErrorMessage } from '../../api/client';
+import { professorService } from '../../services/professorService';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 import { iniciais } from '../../utils/format';
 import { isEmailValido } from '../../utils/validation';
+import { styles } from './styles';
 
 export default function PerfilScreen() {
   const { professor, applyProfileUpdate, logout } = useAuth();
@@ -149,31 +150,3 @@ export default function PerfilScreen() {
     </ScreenContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  hero: {
-    paddingTop: 48,
-    paddingBottom: 28,
-    alignItems: 'center',
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-  },
-  avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(255,255,255,0.25)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 10,
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.6)',
-  },
-  avatarText: { color: '#fff', fontSize: 22, fontWeight: '800' },
-  nome: { color: '#fff', fontSize: 18, fontWeight: '800' },
-  email: { color: 'rgba(255,255,255,0.85)', fontSize: 13, marginTop: 2 },
-  content: { padding: 20, paddingBottom: 48 },
-  sectionTitle: { fontSize: 15, fontWeight: '800', marginBottom: 14 },
-  optionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  optionLabel: { marginLeft: 10, fontSize: 14, fontWeight: '600' },
-});

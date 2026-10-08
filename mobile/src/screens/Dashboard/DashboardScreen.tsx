@@ -1,27 +1,22 @@
-import React, { useCallback, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { DrawerNavigationProp } from '@react-navigation/drawer';
+import { useCallback, useState } from 'react';
+import { Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '../../context/AuthContext';
-import { useAppTheme } from '../../theme/ThemeContext';
+import { useAuth } from '../../hooks/useAuth';
+import { useAppTheme } from '../../hooks/useAppTheme';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { MenuCard } from '../../components/MenuCard';
 import { StatPill } from '../../components/StatPill';
 import { Card } from '../../components/Card';
 import { Badge } from '../../components/Badge';
-import { turmaService } from '../../api/turmaService';
-import { materiaService } from '../../api/materiaService';
-import { turnoService } from '../../api/turnoService';
+import { turmaService } from '../../services/turmaService';
+import { materiaService } from '../../services/materiaService';
+import { turnoService } from '../../services/turnoService';
 import { Turma } from '../../types/models';
-import { DrawerParamList } from '../../navigation/types';
-import { getErrorMessage } from '../../api/client';
+import { getErrorMessage } from '../../utils/getErrorMessage';
+import { styles } from './styles';
+import { DashboardScreenProps } from './types';
 
-interface Props {
-  navigation: DrawerNavigationProp<DrawerParamList, 'Dashboard'>;
-}
-
-export default function DashboardScreen({ navigation }: Props) {
+export default function DashboardScreen({ navigation }: DashboardScreenProps) {
   const { professor } = useAuth();
   const { colors } = useAppTheme();
 
@@ -138,13 +133,3 @@ export default function DashboardScreen({ navigation }: Props) {
     </ScreenContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  saudacao: { fontSize: 14, fontWeight: '500' },
-  nome: { fontSize: 24, fontWeight: '800', marginTop: 2, marginBottom: 20 },
-  statsRow: { flexDirection: 'row', marginBottom: 24, marginHorizontal: -4 },
-  sectionTitle: { fontSize: 16, fontWeight: '800', marginBottom: 14 },
-  sectionHeaderRow: { marginTop: 4 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-  turmaNome: { fontSize: 15, fontWeight: '700' },
-});

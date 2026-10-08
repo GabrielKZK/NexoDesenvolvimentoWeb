@@ -1,29 +1,33 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
-import { Professor } from '../types/models';
-import { professorService } from '../api/professorService';
-import { getErrorMessage } from '../api/client';
-
-const CREDENTIALS_KEY = 'nexo.professor.credentials';
+import { Aluno, AlunoCadastroInput, Professor } from '../types/models';
+import { professorService } from '../services/professorService';
+import { alunoService } from '../services/alunoService';
+import { getErrorMessage } from '../utils/getErrorMessage';
+import { CREDENTIALS_KEY } from '../constants/storage';
 
 interface Credentials {
   email: string;
   senha: string;
 }
 
-interface AuthContextValue {
+export interface AuthContextValue {
   professor: Professor | null;
+  aluno: Aluno | null;
   booting: boolean;
   signingIn: boolean;
   login: (email: string, senha: string) => Promise<void>;
+  loginAluno: (emailInstitucional: string, senha: string) => Promise<void>;
+  cadastrarAluno: (dto: AlunoCadastroInput) => Promise<void>;
+  setAluno: (aluno: Aluno) => void;
   logout: () => Promise<void>;
   refreshProfessor: () => Promise<void>;
   setProfessor: (professor: Professor) => void;
   applyProfileUpdate: (updated: Professor, novaSenha?: string) => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 /** Chama POST /api/professores/login e traduz os status de erro em mensagens legíveis. */
 async function autenticar({ email, senha }: Credentials): Promise<Professor> {
@@ -40,6 +44,7 @@ async function autenticar({ email, senha }: Credentials): Promise<Professor> {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [professor, setProfessorState] = useState<Professor | null>(null);
+  const [aluno, setAlunoState] = useState<Aluno | null>(null);
   const [booting, setBooting] = useState(true);
   const [signingIn, setSigningIn] = useState(false);
 
@@ -72,9 +77,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  /** Login do aluno: a sessão fica só em memória (o backend devolve o AlunoDTO completo). */
+  const loginAluno = async (emailInstitucional: string, senha: string) => {
+    setSigningIn(true);
+    try {
+      const logado = await alunoService.login({ emailInstitucional: emailInstitucional.trim(), senha });
+      setAlunoState(logado);
+    } catch (e) {
+      if (axios.isAxiosError(e) && e.response?.status === 401) {
+        throw new Error('E-mail ou senha incorretos.');
+      }
+      throw new Error(getErrorMessage(e, 'Não foi possível entrar. Verifique sua conexão.'));
+    } finally {
+      setSigningIn(false);
+    }
+  };
+
+  const cadastrarAluno = async (dto: AlunoCadastroInput) => {
+    setSigningIn(true);
+    try {
+      const criado = await alunoService.cadastrar(dto);
+      setAlunoState(criado);
+    } catch (e) {
+      if (axios.isAxiosError(e) && e.response?.status === 400) {
+        throw new Error('Dados inválidos. Confira os campos preenchidos.');
+      }
+      throw new Error(getErrorMessage(e, 'Não foi possível cadastrar. Verifique sua conexão.'));
+    } finally {
+      setSigningIn(false);
+    }
+  };
+
+  const setAluno = (a: Aluno) => setAlunoState(a);
+
   const logout = async () => {
     await SecureStore.deleteItemAsync(CREDENTIALS_KEY).catch(() => {});
     setProfessorState(null);
+    setAlunoState(null);
   };
 
   const refreshProfessor = async () => {
@@ -111,17 +150,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <AuthContext.Provider
-      value={{ professor, booting, signingIn, login, logout, refreshProfessor, setProfessor, applyProfileUpdate }}
+      value={{
+        professor,
+        aluno,
+        booting,
+        signingIn,
+        login,
+        loginAluno,
+        cadastrarAluno,
+        setAluno,
+        logout,
+        refreshProfessor,
+        setProfessor,
+        applyProfileUpdate,
+      }}
     >
       {children}
     </AuthContext.Provider>
   );
 };
-
-export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error('useAuth deve ser usado dentro de AuthProvider');
-  }
-  return ctx;
-}

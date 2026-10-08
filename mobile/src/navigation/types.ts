@@ -1,6 +1,8 @@
+import { UserRole } from '../types/models';
+
 export type AuthStackParamList = {
   Login: undefined;
-  Register: undefined;
+  Register: { role?: UserRole } | undefined;
 };
 
 export type TurmasStackParamList = {
@@ -24,4 +26,10 @@ export type DrawerParamList = {
   MateriasStack: undefined;
   TurnosStack: undefined;
   Perfil: undefined;
+};
+
+export type AlunoStackParamList = {
+  AlunoDashboard: undefined;
+  AlunoMaterias: undefined;
+  AlunoMateriaDetalhe: { materiaId: number };
 };

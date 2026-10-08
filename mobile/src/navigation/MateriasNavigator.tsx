@@ -2,8 +2,8 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MateriasStackParamList } from './types';
 import { useStackScreenOptions } from './useStackScreenOptions';
-import MateriasListScreen from '../screens/Materias/MateriasListScreen';
-import MateriaFormScreen from '../screens/Materias/MateriaFormScreen';
+import MateriasListScreen from '../screens/MateriasList/MateriasListScreen';
+import MateriaFormScreen from '../screens/MateriaForm/MateriaFormScreen';
 
 const Stack = createNativeStackNavigator<MateriasStackParamList>();
 

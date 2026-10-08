@@ -1,3 +1,5 @@
+export type UserRole = 'professor' | 'aluno';
+
 export interface Professor {
   id: number;
   nome: string;
@@ -35,6 +37,31 @@ export interface Turma {
   idProfessor?: number | null;
   nomeProfessor?: string | null;
   materiaIds?: number[];
+}
+
+export interface Aluno {
+  id: number;
+  nome: string;
+  emailInstitucional: string;
+  foto: string | null;
+  xpTotal: number;
+  xpSemana: number;
+  metaSemanalXp: number;
+  ofensivaDias: number;
+  tarefasFeitasHoje: number;
+  tarefasHoje: number;
+}
+
+export interface AlunoCadastroInput {
+  nome: string;
+  emailInstitucional: string;
+  senha: string;
+  foto?: string;
+}
+
+export interface AlunoLoginInput {
+  emailInstitucional: string;
+  senha: string;
 }
 
 export type ProfessorInput = Omit<Professor, 'id' | 'localDateTime'> & { id?: number };

@@ -2,7 +2,7 @@ import React from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons';
 import { DrawerParamList } from './types';
-import { useAppTheme } from '../theme/ThemeContext';
+import { useAppTheme } from '../hooks/useAppTheme';
 import { CustomDrawerContent } from './CustomDrawerContent';
 import DashboardScreen from '../screens/Dashboard/DashboardScreen';
 import PerfilScreen from '../screens/Perfil/PerfilScreen';

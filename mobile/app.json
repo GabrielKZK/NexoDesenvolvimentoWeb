@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Menu do Professor",
-    "slug": "menu-do-professor",
+    "name": "Nexo",
+    "slug": "nexo-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

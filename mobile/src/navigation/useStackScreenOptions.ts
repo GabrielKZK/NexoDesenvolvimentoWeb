@@ -1,4 +1,4 @@
-import { useAppTheme } from '../theme/ThemeContext';
+import { useAppTheme } from '../hooks/useAppTheme';
 
 export function useStackScreenOptions() {
   const { colors } = useAppTheme();

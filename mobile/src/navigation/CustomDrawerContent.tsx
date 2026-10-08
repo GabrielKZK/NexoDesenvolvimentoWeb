@@ -3,8 +3,8 @@ import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { DrawerContentScrollView, DrawerItemList, DrawerContentComponentProps } from '@react-navigation/drawer';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '../context/AuthContext';
-import { useAppTheme } from '../theme/ThemeContext';
+import { useAuth } from '../hooks/useAuth';
+import { useAppTheme } from '../hooks/useAppTheme';
 import { iniciais } from '../utils/format';
 
 export const CustomDrawerContent: React.FC<DrawerContentComponentProps> = (props) => {

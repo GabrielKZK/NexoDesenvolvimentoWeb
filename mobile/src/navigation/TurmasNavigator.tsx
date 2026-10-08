@@ -2,8 +2,8 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { TurmasStackParamList } from './types';
 import { useStackScreenOptions } from './useStackScreenOptions';
-import TurmasListScreen from '../screens/Turmas/TurmasListScreen';
-import TurmaFormScreen from '../screens/Turmas/TurmaFormScreen';
+import TurmasListScreen from '../screens/TurmasList/TurmasListScreen';
+import TurmaFormScreen from '../screens/TurmaForm/TurmaFormScreen';
 
 const Stack = createNativeStackNavigator<TurmasStackParamList>();
 

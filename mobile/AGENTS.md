@@ -27,6 +27,8 @@ Run lint and typecheck before declaring any task done.
 
 - This project intentionally uses **React Navigation** (native-stack + drawer), not Expo Router, to match the course curriculum it follows. Navigators live in `src/navigation/`, screens in `src/screens/<Feature>/`. Keep this convention instead of migrating to Expo Router.
 - Param lists are typed in `src/navigation/types.ts`.
+- One app serves both roles: `RootNavigator` shows the professor drawer, the aluno stack (`AlunoNavigator`) or the auth stack depending on the session in `AuthContext`.
+- Folder convention (from the course material): every component is `src/components/<Name>/{index.tsx,styles.ts,types.ts}` and every screen is `src/screens/<Name>/{<Name>Screen.tsx,styles.ts,types.ts}`. HTTP calls go in `src/services/` (axios instance in `services/api.ts`), shared hooks in `src/hooks/`, constants in `src/constants/`, colors in `src/styles/theme.ts`.
 
 ## Building with EAS
 

@@ -2,8 +2,8 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { TurnosStackParamList } from './types';
 import { useStackScreenOptions } from './useStackScreenOptions';
-import TurnosListScreen from '../screens/Turnos/TurnosListScreen';
-import TurnoFormScreen from '../screens/Turnos/TurnoFormScreen';
+import TurnosListScreen from '../screens/TurnosList/TurnosListScreen';
+import TurnoFormScreen from '../screens/TurnoForm/TurnoFormScreen';
 
 const Stack = createNativeStackNavigator<TurnosStackParamList>();
 

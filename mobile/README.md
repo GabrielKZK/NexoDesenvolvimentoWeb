@@ -1,8 +1,10 @@
-# Menu do Professor — App Mobile
+# Nexo — App Mobile
 
-App em **React Native (Expo + TypeScript)** com o menu/área do professor, consumindo a API Spring Boot deste repositório (`src/main/java/com/nexo/projeto`).
+App único em **React Native (Expo + TypeScript)** com a área do **professor** e a área do **aluno**, consumindo a API Spring Boot deste repositório (`backend/src/main/java/com/nexo/projeto`). Na tela de login/cadastro o usuário escolhe se entra como Professor ou Aluno.
 
 ## Funcionalidades
+
+### Professor
 
 - **Login do professor** (e-mail/senha), com sessão persistida de forma segura no aparelho.
 - **Dashboard**: saudação, contadores (turmas/matérias/turnos) e atalhos de menu.
@@ -10,6 +12,15 @@ App em **React Native (Expo + TypeScript)** com o menu/área do professor, consu
 - **Matérias**: listar, criar, editar, excluir.
 - **Turnos**: listar, criar, editar, excluir; horário de início/fim e status ativo/inativo.
 - **Perfil**: editar dados do professor, trocar senha, alternar tema claro/escuro, sair.
+
+### Aluno
+
+- **Login e cadastro** de aluno (e-mail institucional/senha) e recuperação de senha.
+- **Dashboard**: XP total, ofensiva, meta semanal (com barra de progresso), tarefas do dia e ranking Top 10.
+- **Matérias**: listar, buscar e abrir o detalhe de cada disciplina.
+
+### Geral
+
 - Tema claro/escuro com a paleta de marca do projeto principal (roxo `#9b2fff` → verde `#06d25e`), persistido entre aberturas do app.
 
 ## Como rodar
@@ -24,13 +35,13 @@ Abra no Expo Go (celular físico) ou em um emulador Android/iOS a partir do QR C
 
 ## Configurando o endereço da API
 
-O backend Spring Boot roda por padrão em `http://localhost:8080` (sem context-path). O arquivo [`src/api/config.ts`](src/api/config.ts) já resolve o host correto automaticamente:
+O backend Spring Boot roda por padrão em `http://localhost:8080` (sem context-path). O arquivo [`src/services/config.ts`](src/services/config.ts) já resolve o host correto automaticamente:
 
 - **Emulador Android**: usa `http://10.0.2.2:8080` (não precisa mexer em nada).
 - **iOS Simulator**: usa `http://localhost:8080` (não precisa mexer em nada).
-- **Celular físico** (Expo Go): edite a constante `LAN_IP` em `src/api/config.ts` com o IP da sua máquina na rede local (ex.: `'192.168.0.10'`). O celular e o computador precisam estar na mesma rede Wi-Fi.
+- **Celular físico** (Expo Go): edite a constante `LAN_IP` em `src/services/config.ts` com o IP da sua máquina na rede local (ex.: `'192.168.0.10'`). O celular e o computador precisam estar na mesma rede Wi-Fi.
 
-Lembre-se de deixar o backend rodando e o Postgres acessível antes de testar o app. A senha do banco não fica no repositório: defina a variável `DB_PASSWORD` (ou copie `application-local.properties.example` para `application-local.properties` na raiz) e rode `./mvnw spring-boot:run`. Os endpoints seguem o padrão `/api/<recurso>` (`/api/turmas`, `/api/materias`, `/api/professores`, `/api/turnos`, `/api/alunos`).
+Lembre-se de deixar o backend rodando e o Postgres acessível antes de testar o app. A senha do banco não fica no repositório: defina a variável `DB_PASSWORD` (ou copie `application-local.properties.example` para `application-local.properties` dentro de `backend/`) e rode `./mvnw spring-boot:run` dentro de `backend/`. Os endpoints seguem o padrão `/api/<recurso>` (`/api/turmas`, `/api/materias`, `/api/professores`, `/api/turnos`, `/api/alunos`).
 
 ## ⚠️ Sobre o login do professor
 
@@ -40,14 +51,19 @@ Isso funciona para desenvolvimento/apresentação, mas **não é seguro para pro
 
 ## Estrutura
 
+Segue a organização de projeto apresentada em aula (`src` com `assets`, `components`, `constants`, `hooks`, `screens`, `services`, `styles`, `types`, `utils`):
+
 ```
 src/
-  api/           # axios + services (professor, turma, materia, turno)
-  components/    # botões, inputs, cards, badges, etc. (reutilizáveis e com tema)
-  context/       # AuthContext (sessão do professor)
-  navigation/    # stacks, drawer e tipos de navegação
-  screens/       # telas por módulo (Auth, Dashboard, Turmas, Materias, Turnos, Perfil)
-  theme/         # paleta de cores + ThemeContext (claro/escuro)
-  types/         # tipos espelhando os DTOs do backend
-  utils/         # formatação e validação
+  assets/images/   # logo e imagens
+  components/      # componentes reutilizáveis: <Nome>/index.tsx + styles.ts + types.ts
+  constants/       # constantes (chaves de storage, tamanho mínimo de senha, cores de segmento)
+  context/         # AuthContext (sessão de professor/aluno) e ThemeContext
+  hooks/           # useAuth, useAppTheme
+  navigation/      # stacks, drawer (professor), stack do aluno e tipos de navegação
+  screens/         # <Tela>/<Tela>Screen.tsx + styles.ts + types.ts
+  services/        # api.ts (axios) + services por recurso (professor, turma, materia, turno, aluno)
+  styles/          # theme.ts: paleta de cores claro/escuro
+  types/           # tipos espelhando os DTOs do backend
+  utils/           # formatação, validação, getErrorMessage, etc.
 ```
