@@ -1,85 +1,70 @@
-import { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useMemo, useState } from 'react';
+import { Pressable, Text, TextInput, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAppTheme } from '../../hooks/useAppTheme';
-import { materiaService } from '../../services/materiaService';
-import { Materia } from '../../types/models';
-import { createStyles } from './styles';
-import { AlunoMateriasScreenProps } from './types';
+import { useCarregar } from '../../hooks/useCarregar';
+import { alunoService } from '../../services/alunoService';
+import { RootStackParamList } from '../../navigation/types';
+import { ScreenContainer } from '../../components/ScreenContainer';
+import { AsyncState } from '../../components/AsyncState';
+import { Card } from '../../components/Card';
+import { ProgressBar } from '../../components/ProgressBar';
+import { EmptyState } from '../../components/EmptyState';
+import { styles } from './styles';
 
-export default function AlunoMateriasScreen({ navigation }: AlunoMateriasScreenProps) {
+/** Matérias da etapa do aluno, com o progresso real (web: /materias → GET /api/aluno/materias). */
+export default function AlunoMateriasScreen() {
   const { colors } = useAppTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
-  const [materias, setMaterias] = useState<Materia[]>([]);
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { dados, carregando, atualizando, erro, recarregar } = useCarregar(alunoService.materias);
   const [busca, setBusca] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  const carregar = useCallback(async () => {
-    try {
-      setError(null);
-      setMaterias(await materiaService.listarTodas());
-    } catch {
-      setError('Não foi possível carregar as matérias.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      carregar();
-    }, [carregar])
-  );
-
-  const filtradas = materias.filter((m) => m.nome.toLowerCase().includes(busca.trim().toLowerCase()));
+  const filtradas = useMemo(() => {
+    const termo = busca.trim().toLowerCase();
+    return (dados ?? []).filter((m) => m.nome.toLowerCase().includes(termo));
+  }, [dados, busca]);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Minhas Matérias</Text>
-      <Text style={styles.subtitle}>Explore todo o conteúdo disponível por disciplina</Text>
+    <ScreenContainer refreshing={atualizando} onRefresh={recarregar}>
+      <View style={[styles.busca, { backgroundColor: colors.input, borderColor: colors.border }]}>
+        <Ionicons name="search-outline" size={18} color={colors.textSecondary} />
+        <TextInput
+          style={[styles.buscaInput, { color: colors.text }]}
+          placeholder="Buscar matéria"
+          placeholderTextColor={colors.textSecondary}
+          value={busca}
+          onChangeText={setBusca}
+          autoCorrect={false}
+        />
+      </View>
 
-      <TextInput
-        style={styles.search}
-        placeholder="Buscar matéria..."
-        placeholderTextColor={colors.textSecondary}
-        value={busca}
-        onChangeText={setBusca}
-      />
-
-      {error && (
-        <TouchableOpacity onPress={carregar}>
-          <Text style={styles.error}>{error} Toque para tentar novamente.</Text>
-        </TouchableOpacity>
-      )}
-      {loading && <ActivityIndicator color={colors.brand.purple} style={styles.loading} />}
-
-      <FlatList
-        data={filtradas}
-        keyExtractor={(item) => String(item.id)}
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={!loading && !error ? <Text style={styles.empty}>Nenhuma matéria encontrada.</Text> : null}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <View style={styles.cardHeader}>
-              <View style={styles.icon}>
-                <Text style={styles.iconText}>📚</Text>
-              </View>
-              <View style={styles.info}>
-                <Text style={styles.name}>{item.nome}</Text>
-                <Text style={styles.segmento}>{item.segmento}</Text>
-              </View>
-            </View>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => navigation.navigate('AlunoMateriaDetalhe', { materiaId: item.id })}
+      <AsyncState carregando={carregando} erro={erro} temDados={!!dados} onRetry={recarregar}>
+        {filtradas.length === 0 ? (
+          <EmptyState icon="book-outline" title="Nenhuma matéria encontrada" />
+        ) : (
+          filtradas.map((m) => (
+            <Pressable
+              key={m.id}
+              onPress={() => navigation.navigate('MateriaDetalhe', { materiaId: m.id, nome: m.nome })}
+              accessibilityRole="button"
+              accessibilityLabel={`${m.nome}, ${m.percentual}% concluído`}
             >
-              <Text style={styles.buttonText}>Acessar Disciplina</Text>
-            </TouchableOpacity>
-          </View>
+              <Card style={styles.card}>
+                <View style={styles.row}>
+                  <Text style={[styles.nome, { color: colors.text }]}>{m.nome}</Text>
+                  <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+                </View>
+                <Text style={[styles.sub, { color: colors.textSecondary }]}>
+                  {m.conteudosConcluidos} de {m.totalConteudos} conteúdos · {m.percentual}%
+                </Text>
+                <ProgressBar percent={m.percentual} color={colors.brand.deep} />
+              </Card>
+            </Pressable>
+          ))
         )}
-      />
-    </View>
+      </AsyncState>
+    </ScreenContainer>
   );
 }

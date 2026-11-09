@@ -1,171 +1,92 @@
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
-import * as SecureStore from 'expo-secure-store';
-import { Aluno, AlunoCadastroInput, Professor } from '../types/models';
-import { professorService } from '../services/professorService';
-import { alunoService } from '../services/alunoService';
+import * as authService from '../services/authService';
+import { session } from '../services/session';
+import { Usuario } from '../types/auth';
 import { getErrorMessage } from '../utils/getErrorMessage';
-import { CREDENTIALS_KEY } from '../constants/storage';
-
-interface Credentials {
-  email: string;
-  senha: string;
-}
 
 export interface AuthContextValue {
-  professor: Professor | null;
-  aluno: Aluno | null;
+  usuario: Usuario | null;
+  /** Lendo o disco / renovando a sessão no arranque. */
   booting: boolean;
   signingIn: boolean;
-  login: (email: string, senha: string) => Promise<void>;
-  loginAluno: (emailInstitucional: string, senha: string) => Promise<void>;
-  cadastrarAluno: (dto: AlunoCadastroInput) => Promise<void>;
-  setAluno: (aluno: Aluno) => void;
+  login: (login: string, senha: string) => Promise<void>;
   logout: () => Promise<void>;
-  refreshProfessor: () => Promise<void>;
-  setProfessor: (professor: Professor) => void;
-  applyProfileUpdate: (updated: Professor, novaSenha?: string) => Promise<void>;
+  /** Atualiza o perfil local após editar perfil ou trocar a senha provisória. */
+  atualizarUsuario: (patch: Partial<Pick<Usuario, 'nome' | 'foto' | 'cargo' | 'precisaTrocarSenha'>>) => void;
 }
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-/** Chama POST /api/professores/login e traduz os status de erro em mensagens legíveis. */
-async function autenticar({ email, senha }: Credentials): Promise<Professor> {
-  try {
-    return await professorService.login(email.trim(), senha);
-  } catch (e) {
-    if (axios.isAxiosError(e)) {
-      if (e.response?.status === 401) throw new Error('E-mail ou senha incorretos.');
-      if (e.response?.status === 403) throw new Error('Este cadastro de professor está inativo.');
-    }
-    throw new Error(getErrorMessage(e, 'Não foi possível entrar. Tente novamente.'));
-  }
-}
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [professor, setProfessorState] = useState<Professor | null>(null);
-  const [aluno, setAlunoState] = useState<Aluno | null>(null);
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [booting, setBooting] = useState(true);
   const [signingIn, setSigningIn] = useState(false);
 
+  // Renovação recusada em qualquer chamada (interceptor) → volta ao login.
+  useEffect(() => {
+    session.setOnExpired(() => setUsuario(null));
+    return () => session.setOnExpired(null);
+  }, []);
+
+  // Equivalente ao restaurarSessao() do web: o access token vive só em memória, então
+  // no arranque a sessão é refeita a partir do refresh token guardado.
   useEffect(() => {
     (async () => {
       try {
-        const raw = await SecureStore.getItemAsync(CREDENTIALS_KEY);
-        if (raw) {
-          const credentials: Credentials = JSON.parse(raw);
-          const prof = await autenticar(credentials);
-          setProfessorState(prof);
+        const { usuario: salvo, temRefresh } = await session.load();
+        if (!salvo || !temRefresh) {
+          if (salvo || temRefresh) await session.clear();
+          return;
         }
-      } catch (e) {
-        // Sessão salva ficou inválida (senha alterada, professor removido, etc.)
-        await SecureStore.deleteItemAsync(CREDENTIALS_KEY).catch(() => {});
+        try {
+          setUsuario(await authService.renovar());
+        } catch (e) {
+          if (authService.sessaoRecusada(e)) {
+            await session.clear(); // cookie vencido ou revogado
+          } else {
+            // Sem rede: mantém o perfil em cache; o interceptor renova na primeira chamada que tomar 401.
+            setUsuario(salvo);
+          }
+        }
       } finally {
         setBooting(false);
       }
     })();
   }, []);
 
-  const login = async (email: string, senha: string) => {
+  const login = useCallback(async (loginInformado: string, senha: string) => {
     setSigningIn(true);
     try {
-      const prof = await autenticar({ email, senha });
-      await SecureStore.setItemAsync(CREDENTIALS_KEY, JSON.stringify({ email: email.trim(), senha }));
-      setProfessorState(prof);
-    } finally {
-      setSigningIn(false);
-    }
-  };
-
-  /** Login do aluno: a sessão fica só em memória (o backend devolve o AlunoDTO completo). */
-  const loginAluno = async (emailInstitucional: string, senha: string) => {
-    setSigningIn(true);
-    try {
-      const logado = await alunoService.login({ emailInstitucional: emailInstitucional.trim(), senha });
-      setAlunoState(logado);
+      setUsuario(await authService.login(loginInformado, senha));
     } catch (e) {
       if (axios.isAxiosError(e) && e.response?.status === 401) {
-        throw new Error('E-mail ou senha incorretos.');
+        throw new Error('Login ou senha incorretos.');
       }
-      throw new Error(getErrorMessage(e, 'Não foi possível entrar. Verifique sua conexão.'));
+      throw new Error(getErrorMessage(e, 'Não foi possível entrar. Tente novamente.'));
     } finally {
       setSigningIn(false);
     }
-  };
+  }, []);
 
-  const cadastrarAluno = async (dto: AlunoCadastroInput) => {
-    setSigningIn(true);
-    try {
-      const criado = await alunoService.cadastrar(dto);
-      setAlunoState(criado);
-    } catch (e) {
-      if (axios.isAxiosError(e) && e.response?.status === 400) {
-        throw new Error('Dados inválidos. Confira os campos preenchidos.');
-      }
-      throw new Error(getErrorMessage(e, 'Não foi possível cadastrar. Verifique sua conexão.'));
-    } finally {
-      setSigningIn(false);
-    }
-  };
+  const logout = useCallback(async () => {
+    await authService.logout();
+    setUsuario(null);
+  }, []);
 
-  const setAluno = (a: Aluno) => setAlunoState(a);
+  const atualizarUsuario = useCallback<AuthContextValue['atualizarUsuario']>((patch) => {
+    setUsuario((atual) => {
+      if (!atual) return atual;
+      const novo = { ...atual, ...patch };
+      void session.saveUsuario(novo);
+      return novo;
+    });
+  }, []);
 
-  const logout = async () => {
-    await SecureStore.deleteItemAsync(CREDENTIALS_KEY).catch(() => {});
-    setProfessorState(null);
-    setAlunoState(null);
-  };
-
-  const refreshProfessor = async () => {
-    if (!professor) return;
-    try {
-      const atualizado = await professorService.buscarPorId(professor.id);
-      setProfessorState(atualizado);
-    } catch (e) {
-      // mantém os dados em cache se a rede falhar
-    }
-  };
-
-  const setProfessor = (p: Professor) => setProfessorState(p);
-
-  /** Atualiza o estado local e as credenciais salvas após uma edição de perfil. */
-  const applyProfileUpdate = async (updated: Professor, novaSenha?: string) => {
-    setProfessorState(updated);
-    try {
-      // A API nunca devolve a senha real (fica null no DTO), então mantemos a
-      // senha atual salva localmente a menos que o professor tenha trocado.
-      const raw = await SecureStore.getItemAsync(CREDENTIALS_KEY);
-      const atuais: Credentials | null = raw ? JSON.parse(raw) : null;
-      const senhaParaSalvar = novaSenha ?? atuais?.senha;
-      if (senhaParaSalvar) {
-        await SecureStore.setItemAsync(
-          CREDENTIALS_KEY,
-          JSON.stringify({ email: updated.email, senha: senhaParaSalvar })
-        );
-      }
-    } catch {
-      // mantém a sessão atual mesmo se não conseguir persistir as credenciais
-    }
-  };
-
-  return (
-    <AuthContext.Provider
-      value={{
-        professor,
-        aluno,
-        booting,
-        signingIn,
-        login,
-        loginAluno,
-        cadastrarAluno,
-        setAluno,
-        logout,
-        refreshProfessor,
-        setProfessor,
-        applyProfileUpdate,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({ usuario, booting, signingIn, login, logout, atualizarUsuario }),
+    [usuario, booting, signingIn, login, logout, atualizarUsuario],
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

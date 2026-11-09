@@ -38,7 +38,7 @@ export const Button: React.FC<ButtonProps> = ({
 
   if (variant === 'primary' || variant === 'danger') {
     const gradientColors =
-      variant === 'danger' ? ([colors.status.danger, '#c62828'] as const) : colors.brandGradient;
+      variant === 'danger' ? ([colors.status.dangerSolid, colors.status.dangerSolid] as const) : colors.brandGradient;
     return (
       <Pressable onPress={onPress} disabled={isDisabled} style={({ pressed }) => [{ opacity: pressed ? 0.85 : 1 }, style]}>
         <LinearGradient

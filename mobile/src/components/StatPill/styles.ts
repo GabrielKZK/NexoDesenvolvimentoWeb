@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    width: '46%', // 2 por linha no celular (rótulos inteiros); o cartão que sobra não estica
     borderRadius: 16,
     borderWidth: 1,
     paddingVertical: 14,
@@ -28,6 +28,8 @@ export const styles = StyleSheet.create({
   },
   label: {
     fontSize: 11,
+    lineHeight: 14,
     marginTop: 2,
+    minHeight: 28, // duas linhas: cartões da mesma fileira com a mesma altura
   },
 });

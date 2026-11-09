@@ -1,50 +1,15 @@
 import { StyleSheet } from 'react-native';
-import { Palette } from '../../styles/theme';
 
-export function createStyles(colors: Palette) {
-  return StyleSheet.create({
-    container: {
-      flex: 1,
-      paddingHorizontal: 16,
-      paddingTop: 16,
-      backgroundColor: colors.background,
-    },
-    loading: {
-      marginVertical: 12,
-    },
-    error: {
-      color: '#ef4444',
-    },
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    icon: {
-      width: 92,
-      height: 92,
-      borderRadius: 16,
-      backgroundColor: colors.card,
-      borderWidth: 1,
-      borderColor: colors.border,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    iconText: {
-      fontSize: 44,
-    },
-    info: {
-      flex: 1,
-      marginLeft: 20,
-    },
-    title: {
-      fontSize: 26,
-      fontWeight: 'bold',
-      color: colors.text,
-    },
-    segmento: {
-      fontSize: 14,
-      color: colors.textSecondary,
-      marginTop: 8,
-    },
-  });
-}
+export const styles = StyleSheet.create({
+  card: { marginBottom: 10 },
+  cabecalho: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  titulos: { flex: 1, minHeight: 44, justifyContent: 'center' },
+  titulo: { fontSize: 15, fontWeight: '700' },
+  resumo: { fontSize: 12, marginTop: 2, marginBottom: 6 },
+  check: { minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
+  corpo: { marginTop: 8, gap: 10 },
+  paragrafo: { fontSize: 14, lineHeight: 21 },
+  exemplo: { borderWidth: 1, borderRadius: 12, padding: 12, gap: 4 },
+  exemploRotulo: { fontSize: 12, fontWeight: '800' },
+  erro: { fontSize: 13, marginBottom: 10 },
+});

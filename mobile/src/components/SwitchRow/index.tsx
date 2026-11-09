@@ -15,8 +15,8 @@ export const SwitchRow: React.FC<SwitchRowProps> = ({ label, description, value,
       <Switch
         value={value}
         onValueChange={onValueChange}
-        thumbColor={value ? colors.brand.green : '#f4f3f4'}
-        trackColor={{ false: colors.border, true: `${colors.brand.green}66` }}
+        thumbColor="#FFFFFF"
+        trackColor={{ false: colors.border, true: colors.brand.deep }}
       />
     </View>
   );

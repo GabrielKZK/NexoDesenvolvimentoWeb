@@ -13,8 +13,8 @@ export const Chip: React.FC<ChipProps> = ({ label, selected, onPress }) => {
       style={[
         styles.chip,
         {
-          backgroundColor: selected ? colors.brand.purple : colors.input,
-          borderColor: selected ? colors.brand.purple : colors.border,
+          backgroundColor: selected ? colors.brand.deep : colors.input,
+          borderColor: selected ? colors.brand.deep : colors.border,
         },
       ]}
     >

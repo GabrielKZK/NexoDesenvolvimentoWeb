@@ -6,6 +6,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ThemeProvider } from './src/context/ThemeContext';
 import { useAppTheme } from './src/hooks/useAppTheme';
 import { AuthProvider } from './src/context/AuthContext';
+import { ConfiguracoesProvider } from './src/context/ConfiguracoesContext';
+import { ChatProvider } from './src/context/ChatContext';
 import RootNavigator from './src/navigation/RootNavigator';
 
 function AppContent() {
@@ -14,7 +16,11 @@ function AppContent() {
     <>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <AuthProvider>
-        <RootNavigator />
+        <ConfiguracoesProvider>
+          <ChatProvider>
+            <RootNavigator />
+          </ChatProvider>
+        </ConfiguracoesProvider>
       </AuthProvider>
     </>
   );

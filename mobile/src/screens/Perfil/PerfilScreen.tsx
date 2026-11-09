@@ -1,152 +1,148 @@
 import { useState } from 'react';
-import { Alert, Text, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { ActivityIndicator, Alert, Image, Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuth } from '../../hooks/useAuth';
 import { useAppTheme } from '../../hooks/useAppTheme';
+import { usuariosService } from '../../services/usuariosService';
+import { RootStackParamList } from '../../navigation/types';
+import { RoleCliente } from '../../types/auth';
+import { getErrorMessage } from '../../utils/getErrorMessage';
+import { OrigemFoto, escolherFotoPerfil } from '../../utils/fotoPerfil';
+import { resolverFoto } from '../../utils/avatar';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { Card } from '../../components/Card';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
-import { Badge } from '../../components/Badge';
-import { professorService } from '../../services/professorService';
-import { getErrorMessage } from '../../utils/getErrorMessage';
-import { iniciais } from '../../utils/format';
-import { isEmailValido } from '../../utils/validation';
+import { SwitchRow } from '../../components/SwitchRow';
 import { styles } from './styles';
 
+const ROTULO: Record<RoleCliente, string> = {
+  aluno: 'Aluno',
+  professor: 'Professor',
+  diretor: 'Diretor',
+  admin: 'Administrador',
+};
+
+/** Perfil de qualquer papel (web: /perfil → PATCH /api/usuarios/me). */
 export default function PerfilScreen() {
-  const { professor, applyProfileUpdate, logout } = useAuth();
+  const { usuario, atualizarUsuario, logout } = useAuth();
   const { colors, isDark, toggleTheme } = useAppTheme();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const [nome, setNome] = useState(professor?.nome ?? '');
-  const [email, setEmail] = useState(professor?.email ?? '');
-  const [telefone, setTelefone] = useState(professor?.telefone ?? '');
-  const [disciplina, setDisciplina] = useState(professor?.disciplina ?? '');
-  const [novaSenha, setNovaSenha] = useState('');
+  const [nome, setNome] = useState(usuario?.nome ?? '');
   const [salvando, setSalvando] = useState(false);
+  const [enviandoFoto, setEnviandoFoto] = useState(false);
+  const [msg, setMsg] = useState<{ ok: boolean; texto: string } | null>(null);
 
-  if (!professor) return null;
+  if (!usuario) return null;
+  const alterado = nome.trim() !== usuario.nome && nome.trim().length > 0;
 
   const salvar = async () => {
-    if (!nome.trim() || !email.trim()) {
-      Alert.alert('Atenção', 'Nome e e-mail são obrigatórios.');
-      return;
-    }
-    if (!isEmailValido(email)) {
-      Alert.alert('Atenção', 'Digite um e-mail válido.');
-      return;
-    }
-
+    setMsg(null);
     setSalvando(true);
     try {
-      const dto = {
-        nome: nome.trim(),
-        email: email.trim(),
-        // Em branco = backend mantém a senha atual (só troca se vier preenchida).
-        senha: novaSenha.trim(),
-        disciplina: disciplina.trim(),
-        telefone: telefone.trim(),
-        ativo: professor.ativo,
-      };
-      const atualizado = await professorService.atualizar(professor.id, dto);
-      await applyProfileUpdate(atualizado, novaSenha.trim() || undefined);
-      setNovaSenha('');
-      Alert.alert('Pronto', 'Seu perfil foi atualizado com sucesso.');
+      const atualizado = await usuariosService.atualizarPerfil({ nome: nome.trim() });
+      atualizarUsuario({ nome: atualizado.nome, cargo: atualizado.cargo });
+      setMsg({ ok: true, texto: 'Perfil atualizado.' });
     } catch (e) {
-      Alert.alert('Erro ao salvar', getErrorMessage(e));
+      setMsg({ ok: false, texto: getErrorMessage(e, 'Não foi possível salvar o perfil.') });
     } finally {
       setSalvando(false);
     }
   };
 
-  const confirmarSaida = () => {
-    Alert.alert('Sair', 'Deseja encerrar sua sessão?', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Sair', style: 'destructive', onPress: () => logout() },
-    ]);
+  const trocarFoto = async (origem: OrigemFoto) => {
+    setMsg(null);
+    try {
+      const uri = await escolherFotoPerfil(origem);
+      if (!uri) return; // cancelou
+      setEnviandoFoto(true);
+      const u = await usuariosService.enviarFoto(uri);
+      atualizarUsuario({ foto: resolverFoto(u.foto) });
+      setMsg({ ok: true, texto: 'Foto atualizada.' });
+    } catch (e) {
+      setMsg({ ok: false, texto: getErrorMessage(e, 'Não foi possível enviar a foto.') });
+    } finally {
+      setEnviandoFoto(false);
+    }
   };
 
+  const removerFoto = async () => {
+    setMsg(null);
+    setEnviandoFoto(true);
+    try {
+      await usuariosService.removerFoto();
+      atualizarUsuario({ foto: null });
+    } catch (e) {
+      setMsg({ ok: false, texto: getErrorMessage(e, 'Não foi possível remover a foto.') });
+    } finally {
+      setEnviandoFoto(false);
+    }
+  };
+
+  const abrirOpcoesFoto = () =>
+    Alert.alert('Foto de perfil', undefined, [
+      { text: 'Tirar foto', onPress: () => void trocarFoto('camera') },
+      { text: 'Escolher da galeria', onPress: () => void trocarFoto('galeria') },
+      ...(usuario.foto ? [{ text: 'Remover foto', style: 'destructive' as const, onPress: () => void removerFoto() }] : []),
+      { text: 'Cancelar', style: 'cancel' as const },
+    ]);
+
   return (
-    <ScreenContainer padded={false}>
-      <LinearGradient colors={colors.brandGradient} style={styles.hero}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{iniciais(professor.nome)}</Text>
-        </View>
-        <Text style={styles.nome} numberOfLines={1}>
-          {professor.nome}
-        </Text>
-        <Text style={styles.email} numberOfLines={1}>
-          {professor.email}
-        </Text>
-        <View style={{ marginTop: 10 }}>
-          <Badge
-            label={professor.ativo ? 'Cadastro ativo' : 'Cadastro inativo'}
-            color={professor.ativo ? '#ffffff' : '#ffe0e0'}
-            variant="soft"
-          />
-        </View>
-      </LinearGradient>
-
-      <View style={styles.content}>
-        <Card>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Dados pessoais</Text>
-          <Input label="Nome completo" value={nome} onChangeText={setNome} icon="person-outline" />
-          <Input
-            label="E-mail"
-            value={email}
-            onChangeText={setEmail}
-            icon="mail-outline"
-            autoCapitalize="none"
-            keyboardType="email-address"
-          />
-          <Input
-            label="Telefone"
-            value={telefone}
-            onChangeText={setTelefone}
-            icon="call-outline"
-            keyboardType="phone-pad"
-            placeholder="(00) 00000-0000"
-          />
-          <Input
-            label="Disciplina principal"
-            value={disciplina}
-            onChangeText={setDisciplina}
-            icon="book-outline"
-            placeholder="Ex: Desenvolvimento Mobile"
-          />
-          <Input
-            label="Nova senha (opcional)"
-            value={novaSenha}
-            onChangeText={setNovaSenha}
-            icon="lock-closed-outline"
-            isPassword
-            placeholder="Deixe em branco para manter a atual"
-          />
-
-          <Button title="Salvar alterações" onPress={salvar} loading={salvando} icon="checkmark-circle-outline" />
-        </Card>
-
-        <Card style={{ marginTop: 16 }}>
-          <View style={styles.optionRow}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Ionicons name={isDark ? 'moon' : 'sunny'} size={18} color={colors.textSecondary} />
-              <Text style={[styles.optionLabel, { color: colors.text }]}>
-                Tema {isDark ? 'escuro' : 'claro'}
-              </Text>
+    <ScreenContainer>
+      <View style={styles.topo}>
+        <Pressable
+          onPress={abrirOpcoesFoto}
+          disabled={enviandoFoto}
+          accessibilityRole="button"
+          accessibilityLabel="Alterar foto de perfil"
+        >
+          {usuario.foto ? (
+            <Image source={{ uri: usuario.foto }} style={styles.avatar} accessibilityLabel="Foto de perfil" />
+          ) : (
+            <View style={[styles.avatar, styles.avatarVazio, { backgroundColor: colors.input }]}>
+              <Ionicons name="person" size={40} color={colors.textSecondary} />
             </View>
-            <Button title="Alternar" onPress={toggleTheme} variant="ghost" />
+          )}
+          <View style={[styles.camera, { backgroundColor: colors.brand.deep }]}>
+            {enviandoFoto ? <ActivityIndicator size="small" color="#fff" /> : <Ionicons name="camera" size={16} color="#fff" />}
           </View>
-        </Card>
-
-        <Button
-          title="Sair da conta"
-          onPress={confirmarSaida}
-          variant="outline"
-          icon="log-out-outline"
-          style={{ marginTop: 16, borderColor: colors.status.danger }}
-        />
+        </Pressable>
+        <Text style={[styles.papel, { color: colors.brand.purple }]}>{ROTULO[usuario.role]}</Text>
+        {!!usuario.cargo && <Text style={[styles.cargo, { color: colors.textSecondary }]}>{usuario.cargo}</Text>}
       </View>
+
+      <Card style={styles.card}>
+        <Input label="Nome" icon="person-outline" value={nome} onChangeText={setNome} maxLength={120} />
+        {msg && (
+          <Text style={[styles.msg, { color: msg.ok ? colors.status.success : colors.status.danger }]}>{msg.texto}</Text>
+        )}
+        <Button title="Salvar" onPress={salvar} loading={salvando} disabled={!alterado} icon="checkmark-outline" />
+      </Card>
+
+      <Card style={styles.card}>
+        <SwitchRow label="Tema escuro" value={isDark} onValueChange={toggleTheme} />
+      </Card>
+
+      {usuario.role === 'aluno' && (
+        <Button
+          title="Configurações"
+          variant="outline"
+          icon="settings-outline"
+          onPress={() => navigation.navigate('Configuracoes')}
+          style={styles.botao}
+        />
+      )}
+      <Button
+        title="Trocar senha"
+        variant="outline"
+        icon="key-outline"
+        onPress={() => navigation.navigate('TrocarSenha')}
+        style={styles.botao}
+      />
+      <Button title="Sair" variant="danger" icon="log-out-outline" onPress={logout} />
     </ScreenContainer>
   );
 }

@@ -13,7 +13,7 @@ export const StatPill: React.FC<StatPillProps> = ({ icon, value, label, color })
         <Ionicons name={icon} size={16} color={color} />
       </View>
       <Text style={[styles.value, { color: colors.text }]}>{value}</Text>
-      <Text style={[styles.label, { color: colors.textSecondary }]} numberOfLines={1}>
+      <Text style={[styles.label, { color: colors.textSecondary }]} numberOfLines={2}>
         {label}
       </Text>
     </View>

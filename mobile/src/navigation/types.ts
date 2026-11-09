@@ -1,35 +1,36 @@
-import { UserRole } from '../types/models';
+import type { ChatContato } from '../services/chatService';
 
-export type AuthStackParamList = {
+export type RootStackParamList = {
   Login: undefined;
-  Register: { role?: UserRole } | undefined;
+  TrocarSenha: undefined;
+  Tabs: undefined;
+  MateriaDetalhe: { materiaId: number; nome: string };
+  Quiz: { desafioId: number; titulo: string };
+  Configuracoes: undefined;
+  /** Perfil aberto por cima das abas (papéis cujas abas não têm "Perfil"). */
+  PerfilStack: undefined;
+  Chat: undefined;
+  Conversa: { contato: ChatContato };
+  Inscricoes: undefined;
+  Cadastro: undefined;
+  Auditoria: undefined;
+  CatalogoMateria: { materiaId: number; nome: string };
 };
 
-export type TurmasStackParamList = {
-  TurmasList: undefined;
-  TurmaForm: { id?: number } | undefined;
-};
-
-export type MateriasStackParamList = {
-  MateriasList: undefined;
-  MateriaForm: { id?: number } | undefined;
-};
-
-export type TurnosStackParamList = {
-  TurnosList: undefined;
-  TurnoForm: { id?: number } | undefined;
-};
-
-export type DrawerParamList = {
-  Dashboard: undefined;
-  TurmasStack: undefined;
-  MateriasStack: undefined;
-  TurnosStack: undefined;
+export type TabsParamList = {
+  Inicio: undefined;
+  Materias: undefined;
+  Desafios: undefined;
+  Notas: undefined;
   Perfil: undefined;
-};
-
-export type AlunoStackParamList = {
-  AlunoDashboard: undefined;
-  AlunoMaterias: undefined;
-  AlunoMateriaDetalhe: { materiaId: number };
+  Diario: undefined;
+  NotasProf: undefined;
+  Avaliacoes: undefined;
+  Comunicacao: undefined;
+  Evasao: undefined;
+  Relatorios: undefined;
+  Docentes: undefined;
+  Contas: undefined;
+  Catalogo: undefined;
+  Mais: undefined;
 };

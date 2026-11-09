@@ -1,39 +1,23 @@
 import { api } from './api';
-import { Aluno, AlunoCadastroInput, AlunoLoginInput } from '../types/models';
+import { AlunoDashboardDTO, AlunoNotaDTO, ConteudoMateriaDTO, MateriaProgressoDTO } from '../types/api';
+import { DesafiosResponse, DesafioDTO, QuizPerguntaDTO, QuizResultadoDTO, RespostaItem } from '../types/desafios';
 
-// Rotas espelham AlunoController: @RequestMapping("/api/alunos")
+/** Endpoints do aluno logado (/api/aluno/**, /api/materias/{id}/conteudos). Papel ALUNO. */
 export const alunoService = {
-  cadastrar: async (dto: AlunoCadastroInput): Promise<Aluno> => {
-    const { data } = await api.post<Aluno>('/api/alunos/cadastrar', dto);
-    return data;
-  },
+  dashboard: () => api.get<AlunoDashboardDTO>('/aluno/dashboard').then((r) => r.data),
+  notas: () => api.get<AlunoNotaDTO[]>('/aluno/notas').then((r) => r.data),
 
-  login: async (dto: AlunoLoginInput): Promise<Aluno> => {
-    const { data } = await api.post<Aluno>('/api/alunos/login', dto);
-    return data;
-  },
+  materias: () => api.get<MateriaProgressoDTO[]>('/aluno/materias').then((r) => r.data),
+  conteudos: (materiaId: number) =>
+    api.get<ConteudoMateriaDTO[]>(`/materias/${materiaId}/conteudos`).then((r) => r.data),
+  conteudosConcluidos: (materiaId: number) =>
+    api.get<number[]>(`/aluno/materias/${materiaId}/concluidos`).then((r) => r.data),
+  concluirConteudo: (conteudoId: number) => api.put<void>(`/aluno/conteudos/${conteudoId}/concluido`, {}),
+  desmarcarConteudo: (conteudoId: number) => api.delete<void>(`/aluno/conteudos/${conteudoId}/concluido`),
 
-  redefinirSenha: async (emailInstitucional: string, novaSenha: string): Promise<void> => {
-    await api.patch('/api/alunos/senha/redefinir', { emailInstitucional, novaSenha });
-  },
-
-  concluirTarefa: async (id: number): Promise<Aluno> => {
-    const { data } = await api.post<Aluno>(`/api/alunos/${id}/tarefas/concluir`);
-    return data;
-  },
-
-  definirMetaSemanal: async (id: number, xp: number): Promise<Aluno> => {
-    const { data } = await api.patch<Aluno>(`/api/alunos/${id}/meta`, null, { params: { xp } });
-    return data;
-  },
-
-  progressoDaMetaSemanal: async (id: number): Promise<number> => {
-    const { data } = await api.get<number>(`/api/alunos/${id}/progresso`);
-    return data;
-  },
-
-  top10Geral: async (): Promise<Aluno[]> => {
-    const { data } = await api.get<Aluno[]>('/api/alunos/ranking/top10');
-    return Array.isArray(data) ? data : [];
-  },
+  desafios: () => api.get<DesafiosResponse>('/aluno/desafios').then((r) => r.data),
+  desafio: (id: number) => api.get<DesafioDTO>(`/aluno/desafios/${id}`).then((r) => r.data),
+  perguntas: (id: number) => api.get<QuizPerguntaDTO[]>(`/aluno/desafios/${id}/quiz`).then((r) => r.data),
+  finalizarQuiz: (id: number, respostas: RespostaItem[]) =>
+    api.post<QuizResultadoDTO>(`/aluno/desafios/${id}/quiz/finalizar`, { respostas }).then((r) => r.data),
 };

@@ -6,13 +6,13 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
-    "backgroundColor": "#0d1117",
+    "backgroundColor": "#0B0716",
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#6D28D9",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -24,7 +24,16 @@
     },
     "plugins": [
       "expo-secure-store",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O Nexo acessa suas fotos para você escolher a foto do seu perfil.",
+          "cameraPermission": "O Nexo usa a câmera para você tirar a foto do seu perfil.",
+          "microphonePermission": false
+        }
+      ],
+      "expo-sharing"
     ]
   }
 }

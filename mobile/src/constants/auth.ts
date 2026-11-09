@@ -1,2 +1,3 @@
-export const MIN_SENHA_PROFESSOR = 4;
-export const MIN_SENHA_ALUNO = 8;
+/** Política de senha do backend (PoliticaSenha): mínimo 8; o cliente limita a 50. */
+export const MIN_SENHA = 8;
+export const MAX_SENHA = 50;
