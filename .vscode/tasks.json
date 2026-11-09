@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      // Terminal > Executar Tarefa de Build (Ctrl+Shift+B): sobe o backend com um clique.
+      // Usa o JDK 17+ definido em JAVA_HOME (ver README, seção "Backend").
+      // Compila na 1ª vez; depois sobe em ~15 s.
+      "label": "Backend Nexo",
+      "type": "shell",
+      "command": ".\\rodar-backend.cmd",
+      "options": {
+        "cwd": "${workspaceFolder}/mobile/backend"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "nexo-backend",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Starting NexoApplication",
+          "endsPattern": "Started NexoApplication"
+        }
+      },
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    }
+  ]
+}
