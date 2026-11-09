@@ -47,7 +47,24 @@ O backend do web roda por padrão em `http://localhost:8080`. [`src/services/con
 3. IP do computador que serve o Metro (celular físico);
 4. `10.0.2.2` no emulador Android, `localhost` no iOS Simulator.
 
-Dele saem `API_URL` (`…/api`) e `WS_URL` (`ws(s)://…/ws`). Em produção use **HTTPS/WSS**. Suba o backend do web (`backend/`, com seu Postgres) antes de testar; o celular e o computador precisam estar na mesma rede.
+Dele saem `API_URL` (`…/api`) e `WS_URL` (`ws(s)://…/ws`). Em produção use **HTTPS/WSS**. Suba o backend do web (próxima seção) antes de testar; o celular e o computador precisam estar na mesma rede. Se o backend usar outra porta, mude `API_PORT` em `src/services/config.ts` (ou defina `expo.extra.apiBaseUrl`) — o backend não precisa de alteração.
+
+## Backend do web (obrigatório para testar)
+
+O app **não tem backend próprio**: usa o do projeto web, que fica no repositório `nexonucleo5/nexo-angular` (pasta `backend/`, Spring Boot). O `backend/` que existia *neste* repositório era a API antiga e foi removido.
+
+```bash
+git clone https://github.com/nexonucleo5/nexo-angular.git
+cd nexo-angular/backend
+# JDK 17 ou superior; o segredo do JWT é obrigatório (qualquer texto longo serve em desenvolvimento)
+set NEXO_JWT_SECRET=um-segredo-longo-de-desenvolvimento-0123456789   # Windows (cmd)
+# export NEXO_JWT_SECRET=...                                           # Linux/macOS
+./mvnw spring-boot:run
+```
+
+- Sobe em `http://localhost:8080` com banco H2 local (arquivo `data/`), sem Postgres nem Docker.
+- Com o banco vazio, o seed cria quatro usuários, todos com a senha `123456`: `aluno`, `professor`, `diretor` e `admin`.
+- Em banco que já tem dados valem os logins e senhas desse banco; o seed só roda em banco vazio.
 
 ## Autenticação (resumo)
 
@@ -75,7 +92,7 @@ docs/           # mapeamento-web-mobile.md
 
 ## Pendências e limites conhecidos
 
-- **Nada foi executado em aparelho/emulador** contra o backend: o código passa no `tsc`, mas os fluxos precisam de teste de ponta a ponta (login, refresh, foto, exportação, chat).
+- **Testado no emulador Android (Pixel 9, Expo Go)** contra o backend do web: login dos quatro papéis, renovação da sessão após 15 min, chat em tempo real, foto de perfil (galeria), exportação PDF/Excel e as funções de cada papel. **Não testado:** iOS, foto pela câmera, build de produção (o Android bloqueia HTTP puro em build final: use HTTPS e `extra.apiBaseUrl`) e backend atrás de proxy reverso.
 - **Cookie de refresh** — ver acima.
 - **Origem do WebSocket**: o handshake passa sem cabeçalho `Origin` (comum no React Native). Se algum aparelho enviar `Origin` e o chat for recusado, a liberação precisa ser feita no backend (`nexo.cors.allowed-origins`).
 - **Configurações do aluno**: só gamificação e privacidade; notificações, estudos, acessibilidade e aparência do servidor não foram migradas (o tema é local). Configurações de professor/diretor/admin também não.
