@@ -49,22 +49,38 @@ O backend do web roda por padrão em `http://localhost:8080`. [`src/services/con
 
 Dele saem `API_URL` (`…/api`) e `WS_URL` (`ws(s)://…/ws`). Em produção use **HTTPS/WSS**. Suba o backend do web (próxima seção) antes de testar; o celular e o computador precisam estar na mesma rede. Se o backend usar outra porta, mude `API_PORT` em `src/services/config.ts` (ou defina `expo.extra.apiBaseUrl`) — o backend não precisa de alteração.
 
-## Backend do web (obrigatório para testar)
+## Backend (obrigatório para testar)
 
-O app **não tem backend próprio**: usa o do projeto web, que fica no repositório `nexonucleo5/nexo-angular` (pasta `backend/`, Spring Boot). O `backend/` que existia *neste* repositório era a API antiga e foi removido.
+O app **não tem regras nem dados próprios**: tudo vem do backend do web (Spring Boot). Há duas formas de rodá-lo; ambas são o mesmo código.
+
+### Opção 1 — cópia dentro deste repositório (`backend/`)
+
+É uma réplica do backend do web (`nexonucleo5/nexo-angular`, commit `0e40666`), enxugada só para rodar leve: sem testes, sem Docker e com um perfil `mobile` (pool de conexões e threads menores). **Nenhuma regra foi alterada.** A pasta é ignorada pelo Metro (`metro.config.js`) e não entra no app instalado.
+
+```bash
+cd backend
+# Windows:      rodar-backend.cmd
+# Linux/macOS:  sh rodar-backend.sh
+```
+
+- Requisitos: **JDK 17 ou superior** (usa o `JAVA_HOME` se existir). A 1ª execução compila o `.jar` (alguns minutos); as seguintes sobem direto dele. Para recompilar depois de mudar o código, apague `backend/target`.
+- Sobe em `http://localhost:8080` com banco H2 local (pasta `data/`), sem Postgres nem Docker. Usa ~300–350 MB de memória (limite de 384 MB).
+- Sem `NEXO_JWT_SECRET` no ambiente, o script usa um segredo fixo **só de desenvolvimento**; defina a variável para qualquer outro uso.
+- Com o banco vazio, o seed cria quatro usuários, todos com a senha `123456`: `aluno`, `professor`, `diretor` e `admin`. Em banco que já tem dados valem os logins desse banco.
+
+> ⚠️ **É uma cópia.** Se o backend do web mudar, esta pasta **não acompanha sozinha**: o app pode passar a conversar com regras diferentes das do site. Atualize a cópia sempre que o backend do web mudar (compare com `nexonucleo5/nexo-angular`, pasta `backend/`).
+
+### Opção 2 — backend original do web
 
 ```bash
 git clone https://github.com/nexonucleo5/nexo-angular.git
 cd nexo-angular/backend
-# JDK 17 ou superior; o segredo do JWT é obrigatório (qualquer texto longo serve em desenvolvimento)
 set NEXO_JWT_SECRET=um-segredo-longo-de-desenvolvimento-0123456789   # Windows (cmd)
 # export NEXO_JWT_SECRET=...                                           # Linux/macOS
 ./mvnw spring-boot:run
 ```
 
-- Sobe em `http://localhost:8080` com banco H2 local (arquivo `data/`), sem Postgres nem Docker.
-- Com o banco vazio, o seed cria quatro usuários, todos com a senha `123456`: `aluno`, `professor`, `diretor` e `admin`.
-- Em banco que já tem dados valem os logins e senhas desse banco; o seed só roda em banco vazio.
+Mesmo endereço, mesma porta e mesmos usuários de teste. É a forma que garante estar sempre na versão mais nova do backend.
 
 ## Autenticação (resumo)
 
@@ -87,6 +103,7 @@ src/
   services/     # api.ts (axios + interceptors), auth/session, config e um service por área
   types/        # DTOs do backend (api.ts espelha api.models.ts do web)
   utils/        # datas, avatar, foto de perfil, erros…
+backend/        # cópia enxuta do backend do web, para rodar junto do app (ver "Backend")
 docs/           # mapeamento-web-mobile.md
 ```
 

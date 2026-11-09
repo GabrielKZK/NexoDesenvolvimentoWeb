@@ -1,0 +1,154 @@
+spring:
+  application:
+    name: nexo-backend
+
+  # Carrega o .env local (formato properties) para o segredo do JWT não precisar
+  # estar exportado no shell. Opcional e nos dois caminhos porque o app tanto é
+  # rodado da raiz do repo quanto de dentro de backend/. Em produção não existe
+  # arquivo nenhum: as variáveis vêm do ambiente do Render.
+  config:
+    import:
+      - optional:file:./.env[.properties]
+      - optional:file:../.env[.properties]
+
+  lifecycle:
+    # Teto para o desligamento gracioso abaixo: passou disso, encerra à força.
+    timeout-per-shutdown-phase: 20s
+
+  datasource:
+    url: jdbc:h2:file:./data/nexo;MODE=PostgreSQL;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    username: nexo
+    password: nexo
+    # Pool dimensionado para container pequeno (Render free/hobby tem 0.5 vCPU):
+    # conexão ociosa custa memória no banco e na JVM, e mais conexões que núcleos
+    # só aumenta troca de contexto. 10 conexões saturam bem 2-4 vCPUs.
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 300000        # devolve conexão ociosa em 5 min
+      max-lifetime: 900000        # recicla antes do timeout típico de proxy/PaaS
+      connection-timeout: 10000
+      leak-detection-threshold: 20000
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          # Agrupa INSERT/UPDATE numa só ida ao banco (ex.: salvar a chamada de
+          # uma turma inteira vira 1 roundtrip em vez de 30).
+          batch_size: 30
+          # Menos roundtrips ao paginar resultados grandes (relatórios/agregados).
+          fetch_size: 100
+        order_inserts: true
+        order_updates: true
+        batch_versioned_data: true
+        # Carrega associações lazy em lote: N acessos viram ceil(N/25) queries.
+        # Rede de segurança para qualquer N+1 que escape das queries explícitas.
+        default_batch_fetch_size: 25
+        query:
+          # O default (2048 planos + 128 metadados) é um dos maiores consumidores
+          # de heap ocioso do Hibernate. Esta API tem poucas dezenas de queries.
+          plan_cache_max_size: 256
+          plan_parameter_metadata_max_size: 64
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  # Escapa não-ASCII como \uXXXX no JSON — imune a double-encoding de charset
+  # (evita mojibake de acentos nas respostas da API); o client decodifica de volta.
+  jackson:
+    generator:
+      escape-non-ascii: true
+
+  # Envio da foto de perfil; o cliente já reduz a imagem antes de mandar.
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 3MB
+
+server:
+  # Render (e outros PaaS) injetam a porta em $PORT; local cai no 8080
+  port: ${PORT:8080}
+  # No deploy, para de aceitar conexão nova e deixa as requisições em voo
+  # terminarem. Sem isto o SIGTERM corta no meio: quem estava salvando a chamada
+  # da turma ou trocando a senha recebe erro de conexão.
+  shutdown: graceful
+  # Atrás do proxy do Render a conexão real é HTTP; sem isso, request.isSecure()
+  # sempre dá false e o header HSTS nunca é emitido em produção.
+  forward-headers-strategy: framework
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/plain,text/css,application/javascript,text/javascript,image/svg+xml
+    min-response-size: 1024
+  tomcat:
+    threads:
+      # Cada thread do Tomcat reserva ~1 MB de stack. O default (200) dimensiona
+      # para uma máquina bem maior do que a que roda esta API; 50 já é folgado
+      # para o volume de uma escola e economiza heap/stack no container.
+      max: 50
+      min-spare: 5
+    max-connections: 2000
+    accept-count: 100
+    connection-timeout: 20000
+    # Devolve a thread ociosa (e o buffer dela) em vez de mantê-la presa.
+    keep-alive-timeout: 30000
+
+nexo:
+  jwt:
+    # Sem default: o segredo vem SEMPRE do ambiente, inclusive em dev (.env local).
+    # Gere o seu com `openssl rand -base64 48` — veja o .env.example.
+    secret: ${NEXO_JWT_SECRET}
+    access-token-minutes: 15
+    refresh-token-days: 7
+  cors:
+    # Origem do dev-server Angular
+    allowed-origins: http://localhost:4200
+  auth:
+    # Falhas de login toleradas por origem numa janela de 15 min, antes de a origem ser
+    # barrada. Existe para pegar password spraying (uma senha provável contra centenas de
+    # logins), que o limite por conta — 5 erros, fixo no código — não enxerga.
+    #
+    # O teto é alto de propósito: numa escola, um laboratório inteiro sai pelo mesmo IP
+    # público, e dezenas de erros honestos numa manhã são normais. Suba se houver muitas
+    # máquinas atrás de um NAT só; 0 desliga o limite por origem.
+    max-tentativas-por-ip: ${AUTH_MAX_TENTATIVAS_IP:100}
+    # Renovações inválidas por origem numa janela de 5 min. /api/auth/refresh é público
+    # por necessidade — quem chega nele ainda não tem access token —, então é o único
+    # endpoint em que dava para bater sem custo. 0 desliga.
+    max-refresh-invalidos-por-ip: ${AUTH_MAX_REFRESH_IP:30}
+  proxy:
+    # Quantos proxies existem entre o cliente e esta aplicação. 0 (padrão, e o caso ao
+    # rodar na sua máquina) faz o X-Forwarded-For ser ignorado: o endereço vem do peer da
+    # conexão. Ver ClienteIp — confiar no cabeçalho sem saber a quantidade de saltos deixa
+    # qualquer um forjar o próprio IP e escapar dos limites acima.
+    saltos-confiaveis: ${PROXY_SALTOS_CONFIAVEIS:0}
+  auditoria:
+    # Dias de eventos de auditoria mantidos; o que for mais antigo é apagado às 03:30.
+    # Era a única tabela sem teto de crescimento — login e logout gravam um evento cada.
+    # Folgado de propósito: a tela consulta por ?periodo=<dias> e um corte curto faria a
+    # resposta parecer "sem eventos" onde na verdade foram removidos. 0 desliga.
+    retencao-dias: ${AUDITORIA_RETENCAO_DIAS:365}
+  logs:
+    # Log da aplicação (WARN/ERROR) gravado em logs_aplicacao e lido pelo administrador.
+    # Complementa a auditoria: aquela conta o que as pessoas fizeram, este o que o sistema viveu.
+    nivel-minimo: ${LOGS_NIVEL_MINIMO:WARN}      # INFO, WARN ou ERROR
+    # Dias mantidos; log de sistema serve para diagnóstico, não para histórico. 0 desliga a limpeza.
+    retencao-dias: ${LOGS_RETENCAO_DIAS:30}
+    # Quantas vezes a MESMA mensagem (mesmo nível e origem) é gravada por minuto. Impede que um
+    # loop de erro encha a tabela; o excedente é só contado. 0 desliga o limite.
+    max-por-minuto: ${LOGS_MAX_POR_MINUTO:20}
+    # Resposta de /api mais lenta que isso (ms) vira WARN. 0 desliga.
+    requisicao-lenta-ms: ${LOGS_REQUISICAO_LENTA_MS:2000}
+    # Webhook (Slack ou Discord) que recebe um aviso a cada ERROR. Vazio = desligado.
+    # Vai só a mensagem já mascarada, sem stack trace. O mesmo erro avisa uma vez por janela.
+    alerta-webhook-url: ${LOGS_ALERTA_WEBHOOK_URL:}
+    alerta-intervalo-min: ${LOGS_ALERTA_INTERVALO_MIN:10}
+  seed:
+    enabled: true

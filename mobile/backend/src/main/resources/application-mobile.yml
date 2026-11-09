@@ -1,0 +1,24 @@
+# Perfil "mobile": mesma aplicação, configurada para rodar leve na máquina de quem desenvolve
+# o app. Só ajusta recursos (pool, threads, inicialização preguiçosa); não muda nenhuma regra.
+# Uso: spring.profiles.active=mobile (o script rodar-backend já faz isso).
+spring:
+  main:
+    # Só cria cada componente quando ele é usado pela primeira vez: início mais rápido e
+    # menos memória parada. A primeira chamada de cada área fica um pouco mais lenta.
+    lazy-initialization: true
+  datasource:
+    hikari:
+      maximum-pool-size: 4
+      minimum-idle: 1
+
+server:
+  tomcat:
+    threads:
+      max: 20
+      min-spare: 2
+    accept-count: 20
+
+logging:
+  level:
+    root: WARN
+    com.nexo: INFO
