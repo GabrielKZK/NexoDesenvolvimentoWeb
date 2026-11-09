@@ -12,6 +12,20 @@ if [ -z "$NEXO_JWT_SECRET" ]; then
   echo "[aviso] NEXO_JWT_SECRET não definido: usando um segredo FIXO de desenvolvimento."
 fi
 
+# Usa o Java do JAVA_HOME quando definido (evita pegar um Java antigo que esteja no PATH).
+JAVA=java
+[ -n "$JAVA_HOME" ] && JAVA="$JAVA_HOME/bin/java"
+
+# O backend precisa de JDK 17 ou superior.
+VERSAO=$("$JAVA" -version 2>&1 | head -1 | sed -E 's/.*"([0-9]+)(\.([0-9]+))?.*/\1 \3/')
+PRINCIPAL=${VERSAO%% *}
+[ "$PRINCIPAL" = "1" ] && PRINCIPAL=${VERSAO##* }   # Java 8 aparece como "1.8"
+if [ -z "$PRINCIPAL" ] || [ "$PRINCIPAL" -lt 17 ] 2>/dev/null; then
+  echo "[erro] Java $PRINCIPAL encontrado, mas o backend precisa de JDK 17 ou superior."
+  echo "       Instale o JDK 17+ (ex.: Eclipse Temurin) e defina JAVA_HOME apontando para ele."
+  exit 1
+fi
+
 # Compila uma vez (gera target/nexo-backend-*.jar). Depois roda direto do .jar, sem deixar o
 # Maven aberto (economiza ~300 MB). Para recompilar após mudar o código, apague a pasta target.
 achar_jar() { ls target/nexo-backend-*.jar 2>/dev/null | grep -v '\.original$' | head -1; }
@@ -20,10 +34,6 @@ if [ -z "$JAR" ]; then
   ./mvnw -q -DskipTests package || exit 1
   JAR=$(achar_jar)
 fi
-
-# Usa o Java do JAVA_HOME quando definido (evita pegar um Java antigo que esteja no PATH).
-JAVA=java
-[ -n "$JAVA_HOME" ] && JAVA="$JAVA_HOME/bin/java"
 
 # Limites da JVM: ~400 MB no máximo, GC simples e compilação rápida (início mais veloz).
 exec "$JAVA" -Xmx384m -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -Dspring.profiles.active=mobile -jar "$JAR"
